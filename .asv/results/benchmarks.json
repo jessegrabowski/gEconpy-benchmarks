@@ -1,0 +1,824 @@
+{
+    "bench_import.Import.time_gEconpy": {
+        "code": "class Import:\n    def time_gEconpy(self):\n        import gEconpy  # noqa: F401\n\n    def setup(self):\n        _evict_gEconpy()",
+        "min_run_count": 2,
+        "name": "bench_import.Import.time_gEconpy",
+        "number": 0,
+        "param_names": [],
+        "params": [],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "3ba7ecf3f5792219f22bcf52b5cb84b49402842754985989ccc3b94b61982346",
+        "warmup_time": -1
+    },
+    "bench_import.Import.time_model_build": {
+        "code": "class Import:\n    def time_model_build(self):\n        _evict_gEconpy()\n        from gEconpy.model import build  # noqa: F401\n\n    def setup(self):\n        _evict_gEconpy()",
+        "min_run_count": 2,
+        "name": "bench_import.Import.time_model_build",
+        "number": 0,
+        "param_names": [],
+        "params": [],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "996c0a3443f0dcb1243e856e52f7b2852a24ac1418b74e0922c4a6238aa72d10",
+        "warmup_time": -1
+    },
+    "bench_import.Import.time_parser": {
+        "code": "class Import:\n    def time_parser(self):\n        _evict_gEconpy()\n        from gEconpy import parser  # noqa: F401\n\n    def setup(self):\n        _evict_gEconpy()",
+        "min_run_count": 2,
+        "name": "bench_import.Import.time_parser",
+        "number": 0,
+        "param_names": [],
+        "params": [],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "cd91793b6c0a3ed29e884cdebea2f5127459ae8334d0884eac76010fc00aa9b3",
+        "warmup_time": -1
+    },
+    "bench_import.Import.time_statespace": {
+        "code": "class Import:\n    def time_statespace(self):\n        _evict_gEconpy()\n        from gEconpy.model import statespace  # noqa: F401\n\n    def setup(self):\n        _evict_gEconpy()",
+        "min_run_count": 2,
+        "name": "bench_import.Import.time_statespace",
+        "number": 0,
+        "param_names": [],
+        "params": [],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "02e38f23fdec9fd1f00bac5b5ec3c88e238d9b022bbcb6f54feb480a2807cc38",
+        "warmup_time": -1
+    },
+    "build.bench_build.Build.peakmem_build": {
+        "code": "class Build:\n    def peakmem_build(self, model):\n        self._build(self.path, verbose=False)\n\n    def setup(self, model):\n        from gEconpy.model.build import model_from_gcn\n    \n        self._build = model_from_gcn\n        self.path = gcn_path(model)",
+        "name": "build.bench_build.Build.peakmem_build",
+        "param_names": [
+            "model"
+        ],
+        "params": [
+            [
+                "'small'",
+                "'rbc'",
+                "'medium'",
+                "'large'"
+            ]
+        ],
+        "type": "peakmemory",
+        "unit": "bytes",
+        "version": "bd7b1cfcf85516ed81aa1ca9f32c7cf0ddb4d17c56358dce83c708cfab195194"
+    },
+    "build.bench_build.Build.time_build": {
+        "code": "class Build:\n    def time_build(self, model):\n        self._build(self.path, verbose=False)\n\n    def setup(self, model):\n        from gEconpy.model.build import model_from_gcn\n    \n        self._build = model_from_gcn\n        self.path = gcn_path(model)",
+        "min_run_count": 2,
+        "name": "build.bench_build.Build.time_build",
+        "number": 0,
+        "param_names": [
+            "model"
+        ],
+        "params": [
+            [
+                "'small'",
+                "'rbc'",
+                "'medium'",
+                "'large'"
+            ]
+        ],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "79fd2254033f01ac6b2e7cd59a2214b73bedbc849c06e079673d0545ff530ede",
+        "warmup_time": -1
+    },
+    "end_to_end.bench_pipelines.GcnToSolvedModel.time_gcn_to_solved_model": {
+        "code": "class GcnToSolvedModel:\n    def time_gcn_to_solved_model(self):\n        from gEconpy.model.build import model_from_gcn\n    \n        m = model_from_gcn(self.path, verbose=False)\n        m.steady_state(verbose=False)\n        m.solve_model(verbose=False)\n\n    def setup(self):\n        from .._support import gcn_path\n    \n        self.path = gcn_path(\"rbc\")",
+        "min_run_count": 2,
+        "name": "end_to_end.bench_pipelines.GcnToSolvedModel.time_gcn_to_solved_model",
+        "number": 0,
+        "param_names": [],
+        "params": [],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "c927444008a8975d5423bd2eb4bd12db525d6485360be6cb927c223e369be414",
+        "warmup_time": -1
+    },
+    "end_to_end.bench_pipelines.HotEstimationLoop.time_50_logp_dlogp_steps": {
+        "code": "class HotEstimationLoop:\n    def time_50_logp_dlogp_steps(self):\n        f, q = self._logp_dlogp, self._raveled\n        for _ in range(self.n_steps):\n            f(q)\n\n    def setup(self):\n        from pymc.blocking import DictToArrayBijection\n    \n        from ..estimation._estimation import (\n            build_pymc_model,\n            make_configured_statespace,\n            synthetic_data,\n        )\n    \n        ss_mod = make_configured_statespace(solver=\"gensys\")\n        self.model = build_pymc_model(ss_mod, synthetic_data())\n        self._logp_dlogp = self.model.logp_dlogp_function()\n        self._logp_dlogp.set_extra_values({})\n        self._raveled = DictToArrayBijection.map(self.model.initial_point())\n        self._logp_dlogp(self._raveled)  # warm",
+        "min_run_count": 2,
+        "name": "end_to_end.bench_pipelines.HotEstimationLoop.time_50_logp_dlogp_steps",
+        "number": 0,
+        "param_names": [],
+        "params": [],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "timeout": 600,
+        "type": "time",
+        "unit": "seconds",
+        "version": "1799b6978549dfb696e3286a5acb53fa9b864b1a15d94551b3e5a91483b804f5",
+        "warmup_time": -1
+    },
+    "estimation.bench_build_logp.BuildStatespace.peakmem_build": {
+        "code": "class BuildStatespace:\n    def peakmem_build(self, solver):\n        ss_mod = make_configured_statespace(solver=solver)\n        build_pymc_model(ss_mod, self.data)\n\n    def setup(self, solver):\n        self.data = synthetic_data()",
+        "name": "estimation.bench_build_logp.BuildStatespace.peakmem_build",
+        "param_names": [
+            "solver"
+        ],
+        "params": [
+            [
+                "'gensys'",
+                "'cycle_reduction'"
+            ]
+        ],
+        "timeout": 600,
+        "type": "peakmemory",
+        "unit": "bytes",
+        "version": "df47a47a5adb59e1833a8d6bffaf2b49de6c432f172e42085e984f640cc0e5df"
+    },
+    "estimation.bench_build_logp.BuildStatespace.time_build": {
+        "code": "class BuildStatespace:\n    def time_build(self, solver):\n        ss_mod = make_configured_statespace(solver=solver)\n        build_pymc_model(ss_mod, self.data)\n\n    def setup(self, solver):\n        self.data = synthetic_data()",
+        "min_run_count": 2,
+        "name": "estimation.bench_build_logp.BuildStatespace.time_build",
+        "number": 0,
+        "param_names": [
+            "solver"
+        ],
+        "params": [
+            [
+                "'gensys'",
+                "'cycle_reduction'"
+            ]
+        ],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "timeout": 600,
+        "type": "time",
+        "unit": "seconds",
+        "version": "81937a5c2f0b303eea825b7e93654d7fa09f10813d51b56cd3281f559f509a8d",
+        "warmup_time": -1
+    },
+    "estimation.bench_logp_dlogp.LogpEval.peakmem_logp_dlogp": {
+        "code": "class LogpEval:\n    def peakmem_logp_dlogp(self, solver):\n        self._logp_dlogp(self._raveled)\n\n    def setup(self, solver):\n        from pymc.blocking import DictToArrayBijection\n    \n        ss_mod = make_configured_statespace(solver=solver)\n        self.model = build_pymc_model(ss_mod, synthetic_data())\n        self.point = self.model.initial_point()\n    \n        self._logp = self.model.compile_logp()\n        self._dlogp = self.model.compile_dlogp()\n        self._logp_dlogp = self.model.logp_dlogp_function()\n        self._logp_dlogp.set_extra_values({})\n        self._raveled = DictToArrayBijection.map(self.point)\n    \n        # Warm every compiled function so the timed calls hit no first-call compilation.\n        self._logp(self.point)\n        self._dlogp(self.point)\n        self._logp_dlogp(self._raveled)",
+        "name": "estimation.bench_logp_dlogp.LogpEval.peakmem_logp_dlogp",
+        "param_names": [
+            "solver"
+        ],
+        "params": [
+            [
+                "'gensys'",
+                "'cycle_reduction'"
+            ]
+        ],
+        "timeout": 600,
+        "type": "peakmemory",
+        "unit": "bytes",
+        "version": "1ab5e1c1934dbef1c472f7194bfbb1b369d3e4c4d658bcf34098bed90b7b461d"
+    },
+    "estimation.bench_logp_dlogp.LogpEval.time_dlogp": {
+        "code": "class LogpEval:\n    def time_dlogp(self, solver):\n        self._dlogp(self.point)\n\n    def setup(self, solver):\n        from pymc.blocking import DictToArrayBijection\n    \n        ss_mod = make_configured_statespace(solver=solver)\n        self.model = build_pymc_model(ss_mod, synthetic_data())\n        self.point = self.model.initial_point()\n    \n        self._logp = self.model.compile_logp()\n        self._dlogp = self.model.compile_dlogp()\n        self._logp_dlogp = self.model.logp_dlogp_function()\n        self._logp_dlogp.set_extra_values({})\n        self._raveled = DictToArrayBijection.map(self.point)\n    \n        # Warm every compiled function so the timed calls hit no first-call compilation.\n        self._logp(self.point)\n        self._dlogp(self.point)\n        self._logp_dlogp(self._raveled)",
+        "min_run_count": 2,
+        "name": "estimation.bench_logp_dlogp.LogpEval.time_dlogp",
+        "number": 0,
+        "param_names": [
+            "solver"
+        ],
+        "params": [
+            [
+                "'gensys'",
+                "'cycle_reduction'"
+            ]
+        ],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "timeout": 600,
+        "type": "time",
+        "unit": "seconds",
+        "version": "009ad6395f410f577095c683a2db27d7d7ccaf878642ac77bc95f52fa7acfbd9",
+        "warmup_time": -1
+    },
+    "estimation.bench_logp_dlogp.LogpEval.time_logp": {
+        "code": "class LogpEval:\n    def time_logp(self, solver):\n        self._logp(self.point)\n\n    def setup(self, solver):\n        from pymc.blocking import DictToArrayBijection\n    \n        ss_mod = make_configured_statespace(solver=solver)\n        self.model = build_pymc_model(ss_mod, synthetic_data())\n        self.point = self.model.initial_point()\n    \n        self._logp = self.model.compile_logp()\n        self._dlogp = self.model.compile_dlogp()\n        self._logp_dlogp = self.model.logp_dlogp_function()\n        self._logp_dlogp.set_extra_values({})\n        self._raveled = DictToArrayBijection.map(self.point)\n    \n        # Warm every compiled function so the timed calls hit no first-call compilation.\n        self._logp(self.point)\n        self._dlogp(self.point)\n        self._logp_dlogp(self._raveled)",
+        "min_run_count": 2,
+        "name": "estimation.bench_logp_dlogp.LogpEval.time_logp",
+        "number": 0,
+        "param_names": [
+            "solver"
+        ],
+        "params": [
+            [
+                "'gensys'",
+                "'cycle_reduction'"
+            ]
+        ],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "timeout": 600,
+        "type": "time",
+        "unit": "seconds",
+        "version": "783c5a1824b237eff7909877a0925b93e943c784c0cf8eb2de508137a959f1be",
+        "warmup_time": -1
+    },
+    "estimation.bench_logp_dlogp.LogpEval.time_logp_dlogp": {
+        "code": "class LogpEval:\n    def time_logp_dlogp(self, solver):\n        self._logp_dlogp(self._raveled)\n\n    def setup(self, solver):\n        from pymc.blocking import DictToArrayBijection\n    \n        ss_mod = make_configured_statespace(solver=solver)\n        self.model = build_pymc_model(ss_mod, synthetic_data())\n        self.point = self.model.initial_point()\n    \n        self._logp = self.model.compile_logp()\n        self._dlogp = self.model.compile_dlogp()\n        self._logp_dlogp = self.model.logp_dlogp_function()\n        self._logp_dlogp.set_extra_values({})\n        self._raveled = DictToArrayBijection.map(self.point)\n    \n        # Warm every compiled function so the timed calls hit no first-call compilation.\n        self._logp(self.point)\n        self._dlogp(self.point)\n        self._logp_dlogp(self._raveled)",
+        "min_run_count": 2,
+        "name": "estimation.bench_logp_dlogp.LogpEval.time_logp_dlogp",
+        "number": 0,
+        "param_names": [
+            "solver"
+        ],
+        "params": [
+            [
+                "'gensys'",
+                "'cycle_reduction'"
+            ]
+        ],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "timeout": 600,
+        "type": "time",
+        "unit": "seconds",
+        "version": "a007cb8ec782a315e6a446b3d03bdcac8fc3b864d63641108b4a39bcfaa23b32",
+        "warmup_time": -1
+    },
+    "estimation.bench_statespace_features.FrequencyChange.peakmem_logp_dlogp": {
+        "code": "class FrequencyChange:\n    def peakmem_logp_dlogp(self):\n        self._f(self._q)\n\n    def setup(self):\n        self._f, self._q = warmed_logp_dlogp(frequency_change_model())",
+        "name": "estimation.bench_statespace_features.FrequencyChange.peakmem_logp_dlogp",
+        "param_names": [],
+        "params": [],
+        "timeout": 1200,
+        "type": "peakmemory",
+        "unit": "bytes",
+        "version": "08f1a75a5e7468dab3590fbf41e301b3852a63b5e7785adcb167c8a9e8101d84"
+    },
+    "estimation.bench_statespace_features.FrequencyChange.time_logp_dlogp": {
+        "code": "class FrequencyChange:\n    def time_logp_dlogp(self):\n        self._f(self._q)\n\n    def setup(self):\n        self._f, self._q = warmed_logp_dlogp(frequency_change_model())",
+        "min_run_count": 2,
+        "name": "estimation.bench_statespace_features.FrequencyChange.time_logp_dlogp",
+        "number": 0,
+        "param_names": [],
+        "params": [],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "timeout": 1200,
+        "type": "time",
+        "unit": "seconds",
+        "version": "d4d363a9aaa4b2b66be70940981b4001a059bfa1b5595488c0ba8af417353ebf",
+        "warmup_time": -1
+    },
+    "estimation.bench_statespace_features.MixedLogLin.peakmem_logp_dlogp": {
+        "code": "class MixedLogLin:\n    def peakmem_logp_dlogp(self):\n        self._f(self._q)\n\n    def setup(self):\n        self._f, self._q = warmed_logp_dlogp(mixed_loglin_model())",
+        "name": "estimation.bench_statespace_features.MixedLogLin.peakmem_logp_dlogp",
+        "param_names": [],
+        "params": [],
+        "timeout": 1200,
+        "type": "peakmemory",
+        "unit": "bytes",
+        "version": "819fbebd3955b366c847a09bf8b58f49af321f5d589d85b6f293da9da689e958"
+    },
+    "estimation.bench_statespace_features.MixedLogLin.time_logp_dlogp": {
+        "code": "class MixedLogLin:\n    def time_logp_dlogp(self):\n        self._f(self._q)\n\n    def setup(self):\n        self._f, self._q = warmed_logp_dlogp(mixed_loglin_model())",
+        "min_run_count": 2,
+        "name": "estimation.bench_statespace_features.MixedLogLin.time_logp_dlogp",
+        "number": 0,
+        "param_names": [],
+        "params": [],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "timeout": 1200,
+        "type": "time",
+        "unit": "seconds",
+        "version": "55a514c52031dd54e934b0b64b6c6432b7e9700d4b86f39e3739dee95a39c9e6",
+        "warmup_time": -1
+    },
+    "estimation.bench_statespace_features.ObservationEquations.peakmem_logp_dlogp": {
+        "code": "class ObservationEquations:\n    def peakmem_logp_dlogp(self):\n        self._f(self._q)\n\n    def setup(self):\n        self._f, self._q = warmed_logp_dlogp(observation_equations_model())",
+        "name": "estimation.bench_statespace_features.ObservationEquations.peakmem_logp_dlogp",
+        "param_names": [],
+        "params": [],
+        "timeout": 1200,
+        "type": "peakmemory",
+        "unit": "bytes",
+        "version": "10a60b4e987c8fc25c5d77d9eac29c95b4c9990b59ad694e5e7490764365aa03"
+    },
+    "estimation.bench_statespace_features.ObservationEquations.time_logp_dlogp": {
+        "code": "class ObservationEquations:\n    def time_logp_dlogp(self):\n        self._f(self._q)\n\n    def setup(self):\n        self._f, self._q = warmed_logp_dlogp(observation_equations_model())",
+        "min_run_count": 2,
+        "name": "estimation.bench_statespace_features.ObservationEquations.time_logp_dlogp",
+        "number": 0,
+        "param_names": [],
+        "params": [],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "timeout": 1200,
+        "type": "time",
+        "unit": "seconds",
+        "version": "07a35362104e490fb8095ba85b49a902dbf658215896b5a7494c7244fdaa494a",
+        "warmup_time": -1
+    },
+    "linearize.bench_linearize.LinearizeEval.time_eval": {
+        "code": "class LinearizeEval:\n    def time_eval(self, model):\n        \"\"\"Evaluate the (cached) compiled A/B/C/D function at the steady state.\"\"\"\n        self.model.linearize_model(verbose=False)\n\n    def setup(self, model):\n        self.model = build_model(model)\n        self.model.steady_state(verbose=False)\n        self.model.linearize_model(verbose=False)  # warm the A/B/C/D compile",
+        "min_run_count": 2,
+        "name": "linearize.bench_linearize.LinearizeEval.time_eval",
+        "number": 0,
+        "param_names": [
+            "model"
+        ],
+        "params": [
+            [
+                "'small'",
+                "'rbc'",
+                "'medium'",
+                "'large'"
+            ]
+        ],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "1f872b67806c2986cfe69e52244464fd5b93c84866b7f181cf82b20e1c053fb0",
+        "warmup_time": -1
+    },
+    "linearize.bench_linearize.LinearizeSymbolic.time_symbolic": {
+        "code": "class LinearizeSymbolic:\n    def time_symbolic(self, model):\n        \"\"\"Build the A/B/C/D PyTensor graphs via autodiff (cache cleared each call).\"\"\"\n        self.model._symbolic_linearize_cache.clear()\n        self.model.symbolic_linearization(verbose=False)\n\n    def setup(self, model):\n        self.model = build_model(model)\n        self.model.steady_state(verbose=False)\n        self.model.symbolic_linearization(verbose=False)  # create the graph cache",
+        "min_run_count": 2,
+        "name": "linearize.bench_linearize.LinearizeSymbolic.time_symbolic",
+        "number": 0,
+        "param_names": [
+            "model"
+        ],
+        "params": [
+            [
+                "'small'",
+                "'rbc'",
+                "'medium'",
+                "'large'"
+            ]
+        ],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "be510f738f73a1af4cc0d6489347d3983ba883e577214982909bdae02bb3e249",
+        "warmup_time": -1
+    },
+    "parser.bench_parse.Parse.time_grammar": {
+        "code": "class Parse:\n    def time_grammar(self, model):\n        \"\"\"Lex + parse the GCN text into a parse tree (no block simplification).\"\"\"\n        self._parse_gcn(self.text)\n\n    def setup(self, model):\n        from gEconpy.parser import load_gcn_file, parse_gcn\n    \n        self._parse_gcn = parse_gcn\n        self._load_gcn_file = load_gcn_file\n        self.path = gcn_path(model)\n        self.text = self.path.read_text()",
+        "min_run_count": 2,
+        "name": "parser.bench_parse.Parse.time_grammar",
+        "number": 0,
+        "param_names": [
+            "model"
+        ],
+        "params": [
+            [
+                "'small'",
+                "'rbc'",
+                "'medium'",
+                "'large'"
+            ]
+        ],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "2829dcb22d0da770993ddccec9b3aa31811610601207a946a2dfcdecef665958",
+        "warmup_time": -1
+    },
+    "parser.bench_parse.Parse.time_load_to_primitives": {
+        "code": "class Parse:\n    def time_load_to_primitives(self, model):\n        \"\"\"Full parse + block simplification down to model primitives.\"\"\"\n        self._load_gcn_file(self.path)\n\n    def setup(self, model):\n        from gEconpy.parser import load_gcn_file, parse_gcn\n    \n        self._parse_gcn = parse_gcn\n        self._load_gcn_file = load_gcn_file\n        self.path = gcn_path(model)\n        self.text = self.path.read_text()",
+        "min_run_count": 2,
+        "name": "parser.bench_parse.Parse.time_load_to_primitives",
+        "number": 0,
+        "param_names": [
+            "model"
+        ],
+        "params": [
+            [
+                "'small'",
+                "'rbc'",
+                "'medium'",
+                "'large'"
+            ]
+        ],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "01797c796c8a85bbd989869ba3e4433724e2e8bd467bb598042d5f888900877a",
+        "warmup_time": -1
+    },
+    "perfect_foresight.bench_solve.PerfectForesight.peakmem_solve": {
+        "code": "class PerfectForesight:\n    def peakmem_solve(self, model, horizon):\n        self._solve(\n            self.model,\n            simulation_length=horizon,\n            initial_conditions=self.initial_conditions,\n        )\n\n    def setup(self, model, horizon):\n        from gEconpy import solve_perfect_foresight\n    \n        self._solve = solve_perfect_foresight\n        self.model = build_model(model)\n        ss = self.model.steady_state(verbose=False)\n    \n        # Perturb the first state variable away from its steady state to drive the transition.\n        first_var = self.model.variables[0].base_name\n        self.initial_conditions = {first_var: ss[f\"{first_var}_ss\"] * 0.9}",
+        "name": "perfect_foresight.bench_solve.PerfectForesight.peakmem_solve",
+        "param_names": [
+            "model",
+            "horizon"
+        ],
+        "params": [
+            [
+                "'rbc'",
+                "'medium'"
+            ],
+            [
+                "50",
+                "100",
+                "200"
+            ]
+        ],
+        "type": "peakmemory",
+        "unit": "bytes",
+        "version": "eaccdf7add61f957c20d922690277e315e3423bcc9aac2fda1e8ae7b6c655426"
+    },
+    "perfect_foresight.bench_solve.PerfectForesight.time_solve": {
+        "code": "class PerfectForesight:\n    def time_solve(self, model, horizon):\n        self._solve(\n            self.model,\n            simulation_length=horizon,\n            initial_conditions=self.initial_conditions,\n        )\n\n    def setup(self, model, horizon):\n        from gEconpy import solve_perfect_foresight\n    \n        self._solve = solve_perfect_foresight\n        self.model = build_model(model)\n        ss = self.model.steady_state(verbose=False)\n    \n        # Perturb the first state variable away from its steady state to drive the transition.\n        first_var = self.model.variables[0].base_name\n        self.initial_conditions = {first_var: ss[f\"{first_var}_ss\"] * 0.9}",
+        "min_run_count": 2,
+        "name": "perfect_foresight.bench_solve.PerfectForesight.time_solve",
+        "number": 0,
+        "param_names": [
+            "model",
+            "horizon"
+        ],
+        "params": [
+            [
+                "'rbc'",
+                "'medium'"
+            ],
+            [
+                "50",
+                "100",
+                "200"
+            ]
+        ],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "737591a37ccd55307e03617ec1dd7b9b9b581876c010023aabaed862d26ba348",
+        "warmup_time": -1
+    },
+    "perturbation.bench_solve.Solve.peakmem_solve": {
+        "code": "class Solve:\n    def peakmem_solve(self, model, solver):\n        self.model.solve_model(solver=solver, verbose=False)\n\n    def setup(self, model, solver):\n        self.model = build_model(model)\n        self.model.steady_state(verbose=False)\n        self.model.solve_model(solver=solver, verbose=False)  # warm linearize compile",
+        "name": "perturbation.bench_solve.Solve.peakmem_solve",
+        "param_names": [
+            "model",
+            "solver"
+        ],
+        "params": [
+            [
+                "'small'",
+                "'rbc'",
+                "'medium'",
+                "'large'"
+            ],
+            [
+                "'cycle_reduction'",
+                "'gensys'"
+            ]
+        ],
+        "type": "peakmemory",
+        "unit": "bytes",
+        "version": "5511d90dba112e7e6d3f59fbfd1189fbd4e99218ef9e2ec0068edbffb3ba6893"
+    },
+    "perturbation.bench_solve.Solve.time_solve": {
+        "code": "class Solve:\n    def time_solve(self, model, solver):\n        self.model.solve_model(solver=solver, verbose=False)\n\n    def setup(self, model, solver):\n        self.model = build_model(model)\n        self.model.steady_state(verbose=False)\n        self.model.solve_model(solver=solver, verbose=False)  # warm linearize compile",
+        "min_run_count": 2,
+        "name": "perturbation.bench_solve.Solve.time_solve",
+        "number": 0,
+        "param_names": [
+            "model",
+            "solver"
+        ],
+        "params": [
+            [
+                "'small'",
+                "'rbc'",
+                "'medium'",
+                "'large'"
+            ],
+            [
+                "'cycle_reduction'",
+                "'gensys'"
+            ]
+        ],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "a7ba8c85f016077305111f769b5f65596f6a092c8a89c1552baabf88694c0437",
+        "warmup_time": -1
+    },
+    "solvers.bench_perturbation_solvers.BackwardDirect.time_solve": {
+        "code": "class BackwardDirect:\n    def time_solve(self, model):\n        self._solve(self.A, self.B, self.C, self.D)\n\n    def setup(self, model):\n        super().setup(model)\n        from gEconpy.solvers.backward_looking import solve_policy_function_with_backward_direct\n    \n        self._solve = solve_policy_function_with_backward_direct",
+        "min_run_count": 2,
+        "name": "solvers.bench_perturbation_solvers.BackwardDirect.time_solve",
+        "number": 0,
+        "param_names": [
+            "model"
+        ],
+        "params": [
+            [
+                "'small'",
+                "'rbc'",
+                "'medium'",
+                "'large'"
+            ]
+        ],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "b4d8204f74206827302eea8157fdd7b5f60c5cc41677ca7bc62995d516b4a97f",
+        "warmup_time": -1
+    },
+    "solvers.bench_perturbation_solvers.CycleReduction.time_solve": {
+        "code": "class CycleReduction:\n    def time_solve(self, model):\n        self._solve(self.A, self.B, self.C, self.D, max_iter=1000, tol=1e-8, verbose=False)\n\n    def setup(self, model):\n        super().setup(model)\n        from gEconpy.solvers.cycle_reduction import solve_policy_function_with_cycle_reduction\n    \n        self._solve = solve_policy_function_with_cycle_reduction",
+        "min_run_count": 2,
+        "name": "solvers.bench_perturbation_solvers.CycleReduction.time_solve",
+        "number": 0,
+        "param_names": [
+            "model"
+        ],
+        "params": [
+            [
+                "'small'",
+                "'rbc'",
+                "'medium'",
+                "'large'"
+            ]
+        ],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "76f20f5a194d728ae7462baffabe5a867cf12a6cd4fae2066a26142fc177513c",
+        "warmup_time": -1
+    },
+    "solvers.bench_perturbation_solvers.Gensys.time_solve": {
+        "code": "class Gensys:\n    def time_solve(self, model):\n        self._solve(self.A, self.B, self.C, self.D, tol=1e-8)\n\n    def setup(self, model):\n        super().setup(model)\n        from gEconpy.solvers.gensys import solve_policy_function_with_gensys\n    \n        self._solve = solve_policy_function_with_gensys",
+        "min_run_count": 2,
+        "name": "solvers.bench_perturbation_solvers.Gensys.time_solve",
+        "number": 0,
+        "param_names": [
+            "model"
+        ],
+        "params": [
+            [
+                "'small'",
+                "'rbc'",
+                "'medium'",
+                "'large'"
+            ]
+        ],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "dddab14b93a227bb6a103cb3beddd31293950bbf2373e698568c721dda1653e4",
+        "warmup_time": -1
+    },
+    "solvers.bench_sparse_root.SparseRoot.peakmem_solve": {
+        "code": "class SparseRoot:\n    def peakmem_solve(self, system_size):\n        self._sparse_root(self.fun, self.x0, tol=TOL, maxiter=MAXITER)\n\n    def setup(self, system_size):\n        from gEconpy.solvers.sparse_root import sparse_root\n    \n        self._sparse_root = sparse_root\n        rng = np.random.default_rng(42)\n        self.x0 = rng.standard_normal(system_size)\n    \n        # Diagonal dominance keeps the system well-conditioned and the solve deterministic.\n        A = sparse.diags(2.0 + rng.random(system_size), format=\"csc\")\n        b = rng.standard_normal(system_size)\n    \n        def fun(x):\n            return A @ x - b, A\n    \n        self.fun = fun",
+        "name": "solvers.bench_sparse_root.SparseRoot.peakmem_solve",
+        "param_names": [
+            "system_size"
+        ],
+        "params": [
+            [
+                "100",
+                "500",
+                "1000"
+            ]
+        ],
+        "type": "peakmemory",
+        "unit": "bytes",
+        "version": "cdb1f6da67b1872c93978cf602f77f3a19112c6b23670c722fa83249290c1af4"
+    },
+    "solvers.bench_sparse_root.SparseRoot.time_solve": {
+        "code": "class SparseRoot:\n    def time_solve(self, system_size):\n        self._sparse_root(self.fun, self.x0, tol=TOL, maxiter=MAXITER)\n\n    def setup(self, system_size):\n        from gEconpy.solvers.sparse_root import sparse_root\n    \n        self._sparse_root = sparse_root\n        rng = np.random.default_rng(42)\n        self.x0 = rng.standard_normal(system_size)\n    \n        # Diagonal dominance keeps the system well-conditioned and the solve deterministic.\n        A = sparse.diags(2.0 + rng.random(system_size), format=\"csc\")\n        b = rng.standard_normal(system_size)\n    \n        def fun(x):\n            return A @ x - b, A\n    \n        self.fun = fun",
+        "min_run_count": 2,
+        "name": "solvers.bench_sparse_root.SparseRoot.time_solve",
+        "number": 0,
+        "param_names": [
+            "system_size"
+        ],
+        "params": [
+            [
+                "100",
+                "500",
+                "1000"
+            ]
+        ],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "cc64d35d13ac59170b7a20ab3447d8d2cd02df9f75f0be77fa7058b026cc0a46",
+        "warmup_time": -1
+    },
+    "statistics.bench_covariance.Statistics.time_autocovariance": {
+        "code": "class Statistics:\n    def time_autocovariance(self, model):\n        self._autocovariance_matrix(self.model, T=self.T, R=self.R, shock_std=1.0, n_lags=10)\n\n    def setup(self, model):\n        from gEconpy import (\n            autocovariance_matrix,\n            check_bk_condition,\n            impulse_response_function,\n            simulate,\n            stationary_covariance_matrix,\n        )\n    \n        self.model, self.T, self.R = policy_matrices(model)\n        self._stationary_covariance_matrix = stationary_covariance_matrix\n        self._autocovariance_matrix = autocovariance_matrix\n        self._impulse_response_function = impulse_response_function\n        self._simulate = simulate\n        self._check_bk_condition = check_bk_condition",
+        "min_run_count": 2,
+        "name": "statistics.bench_covariance.Statistics.time_autocovariance",
+        "number": 0,
+        "param_names": [
+            "model"
+        ],
+        "params": [
+            [
+                "'rbc'",
+                "'medium'"
+            ]
+        ],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "7760114f15230019f738972c89fa7d161219593eb5c1097059ea9eca12fbac72",
+        "warmup_time": -1
+    },
+    "statistics.bench_covariance.Statistics.time_check_bk_condition": {
+        "code": "class Statistics:\n    def time_check_bk_condition(self, model):\n        self._check_bk_condition(self.model, verbose=False)\n\n    def setup(self, model):\n        from gEconpy import (\n            autocovariance_matrix,\n            check_bk_condition,\n            impulse_response_function,\n            simulate,\n            stationary_covariance_matrix,\n        )\n    \n        self.model, self.T, self.R = policy_matrices(model)\n        self._stationary_covariance_matrix = stationary_covariance_matrix\n        self._autocovariance_matrix = autocovariance_matrix\n        self._impulse_response_function = impulse_response_function\n        self._simulate = simulate\n        self._check_bk_condition = check_bk_condition",
+        "min_run_count": 2,
+        "name": "statistics.bench_covariance.Statistics.time_check_bk_condition",
+        "number": 0,
+        "param_names": [
+            "model"
+        ],
+        "params": [
+            [
+                "'rbc'",
+                "'medium'"
+            ]
+        ],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "9c7385d222f2223561555ce0f4cfdfb18ea0e47e12b38dc922b3c32ff7419659",
+        "warmup_time": -1
+    },
+    "statistics.bench_covariance.Statistics.time_impulse_response": {
+        "code": "class Statistics:\n    def time_impulse_response(self, model):\n        self._impulse_response_function(\n            self.model, T=self.T, R=self.R, simulation_length=40, shock_size=1.0\n        )\n\n    def setup(self, model):\n        from gEconpy import (\n            autocovariance_matrix,\n            check_bk_condition,\n            impulse_response_function,\n            simulate,\n            stationary_covariance_matrix,\n        )\n    \n        self.model, self.T, self.R = policy_matrices(model)\n        self._stationary_covariance_matrix = stationary_covariance_matrix\n        self._autocovariance_matrix = autocovariance_matrix\n        self._impulse_response_function = impulse_response_function\n        self._simulate = simulate\n        self._check_bk_condition = check_bk_condition",
+        "min_run_count": 2,
+        "name": "statistics.bench_covariance.Statistics.time_impulse_response",
+        "number": 0,
+        "param_names": [
+            "model"
+        ],
+        "params": [
+            [
+                "'rbc'",
+                "'medium'"
+            ]
+        ],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "0a450a87898709949de845d2a663bacc38dc029d77e7df1573b6e7420f6e8c75",
+        "warmup_time": -1
+    },
+    "statistics.bench_covariance.Statistics.time_simulate": {
+        "code": "class Statistics:\n    def time_simulate(self, model):\n        self._simulate(self.model, T=self.T, R=self.R, simulation_length=100, shock_std=1.0)\n\n    def setup(self, model):\n        from gEconpy import (\n            autocovariance_matrix,\n            check_bk_condition,\n            impulse_response_function,\n            simulate,\n            stationary_covariance_matrix,\n        )\n    \n        self.model, self.T, self.R = policy_matrices(model)\n        self._stationary_covariance_matrix = stationary_covariance_matrix\n        self._autocovariance_matrix = autocovariance_matrix\n        self._impulse_response_function = impulse_response_function\n        self._simulate = simulate\n        self._check_bk_condition = check_bk_condition",
+        "min_run_count": 2,
+        "name": "statistics.bench_covariance.Statistics.time_simulate",
+        "number": 0,
+        "param_names": [
+            "model"
+        ],
+        "params": [
+            [
+                "'rbc'",
+                "'medium'"
+            ]
+        ],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "44a18075002111f2d564369de48e7cc742cef437d0598ec4efbaf3bc5eae9a48",
+        "warmup_time": -1
+    },
+    "statistics.bench_covariance.Statistics.time_stationary_covariance": {
+        "code": "class Statistics:\n    def time_stationary_covariance(self, model):\n        self._stationary_covariance_matrix(self.model, T=self.T, R=self.R, shock_std=1.0)\n\n    def setup(self, model):\n        from gEconpy import (\n            autocovariance_matrix,\n            check_bk_condition,\n            impulse_response_function,\n            simulate,\n            stationary_covariance_matrix,\n        )\n    \n        self.model, self.T, self.R = policy_matrices(model)\n        self._stationary_covariance_matrix = stationary_covariance_matrix\n        self._autocovariance_matrix = autocovariance_matrix\n        self._impulse_response_function = impulse_response_function\n        self._simulate = simulate\n        self._check_bk_condition = check_bk_condition",
+        "min_run_count": 2,
+        "name": "statistics.bench_covariance.Statistics.time_stationary_covariance",
+        "number": 0,
+        "param_names": [
+            "model"
+        ],
+        "params": [
+            [
+                "'rbc'",
+                "'medium'"
+            ]
+        ],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "6942b2e86b460bd0e29965bf6c3d8ad13b144866fa5d6962d7ead47cbb1f9c67",
+        "warmup_time": -1
+    },
+    "steady_state.bench_steady_state.Analytic.peakmem_analytic": {
+        "code": "class Analytic:\n    def peakmem_analytic(self, model):\n        self.model.steady_state(how=\"analytic\", verbose=False)\n\n    def setup(self, model):\n        self.model = build_model(model)\n        self.model.steady_state(how=\"analytic\", verbose=False)  # warm the f_ss compile",
+        "name": "steady_state.bench_steady_state.Analytic.peakmem_analytic",
+        "param_names": [
+            "model"
+        ],
+        "params": [
+            [
+                "'small'",
+                "'rbc'",
+                "'medium'",
+                "'large'"
+            ]
+        ],
+        "type": "peakmemory",
+        "unit": "bytes",
+        "version": "cf57588c90ee1c1fdb0a4a52ece12a82734dabca7836684d90f7f42870721809"
+    },
+    "steady_state.bench_steady_state.Analytic.time_analytic": {
+        "code": "class Analytic:\n    def time_analytic(self, model):\n        self.model.steady_state(how=\"analytic\", verbose=False)\n\n    def setup(self, model):\n        self.model = build_model(model)\n        self.model.steady_state(how=\"analytic\", verbose=False)  # warm the f_ss compile",
+        "min_run_count": 2,
+        "name": "steady_state.bench_steady_state.Analytic.time_analytic",
+        "number": 0,
+        "param_names": [
+            "model"
+        ],
+        "params": [
+            [
+                "'small'",
+                "'rbc'",
+                "'medium'",
+                "'large'"
+            ]
+        ],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "4cdd863f7e59735a1267cf023becc70eb2670a7dea00eae34aaf18507ef5be52",
+        "warmup_time": -1
+    },
+    "steady_state.bench_steady_state.Numeric.time_root": {
+        "code": "class Numeric:\n    def time_root(self, model):\n        self.model.steady_state(how=\"root\", progressbar=False, verbose=False)\n\n    def setup(self, model):\n        self.model = build_model(model)\n        # Warm the residual/Jacobian compile so the timed call measures only the solve.\n        self.model.steady_state(how=\"root\", progressbar=False, verbose=False)",
+        "min_run_count": 2,
+        "name": "steady_state.bench_steady_state.Numeric.time_root",
+        "number": 0,
+        "param_names": [
+            "model"
+        ],
+        "params": [
+            [
+                "'small'",
+                "'rbc'"
+            ]
+        ],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "type": "time",
+        "unit": "seconds",
+        "version": "4ab485ab3d122ceec5ec6a2039a259e26cd089abddfca2695501c35f1796d0f9",
+        "warmup_time": -1
+    },
+    "version": 2
+}

@@ -1,0 +1,28 @@
+"""Model construction from a GCN file.
+
+`model_from_gcn` is the symbolic pipeline (parse, FOC derivation, substitution); PyTensor/numba
+compilation is lazy and happens on first use, benchmarked separately under linearize/ and
+estimation/. Because no compilation happens here, building a fresh model each call is a genuinely
+cold measurement with no shared state.
+"""
+
+from .._support import gcn_path
+
+LADDER = ["small", "rbc", "medium", "large"]
+
+
+class Build:
+    params = [LADDER]
+    param_names = ["model"]
+
+    def setup(self, model):
+        from gEconpy.model.build import model_from_gcn
+
+        self._build = model_from_gcn
+        self.path = gcn_path(model)
+
+    def time_build(self, model):
+        self._build(self.path, verbose=False)
+
+    def peakmem_build(self, model):
+        self._build(self.path, verbose=False)

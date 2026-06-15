@@ -1,0 +1,18 @@
+{
+    "version": 1,
+    "project": "gEconpy",
+    "project_url": "https://github.com/jessegrabowski/gEconpy",
+    "repo": "https://github.com/jessegrabowski/gEconpy.git",
+    "branches": ["main"],
+    "show_commit_url": "https://github.com/jessegrabowski/gEconpy/commit/",
+    "dvcs": "git",
+    "benchmark_dir": "benchmarks",
+    "environment_type": "existing",
+    "benchmark_timeout": 600,
+    "regressions_first_commits": {
+        ".*": "7ae3366"
+    },
+    "env_dir": ".asv/env",
+    "results_dir": ".asv/results",
+    "html_dir": ".asv/html"
+}

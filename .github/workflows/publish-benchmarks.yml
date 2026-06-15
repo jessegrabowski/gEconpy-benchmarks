@@ -1,0 +1,53 @@
+name: Publish benchmarks
+
+# Renders committed benchmark results to HTML and deploys to GitHub Pages. CI does NOT build
+# environments or run benchmarks (those are run locally and committed under .asv/results/), so this
+# is fast and deterministic.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".asv/results/**"
+      - "asv.conf.json"
+      - ".github/workflows/publish-benchmarks.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install asv
+        run: pip install "asv>=0.6.4"
+
+      - name: Build HTML from committed results
+        # asv publish clones the project (per asv.conf.json `repo`) to map commit hashes to dates
+        # and messages, then renders .asv/results/ into static HTML under .asv/html/.
+        run: asv publish
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .asv/html
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

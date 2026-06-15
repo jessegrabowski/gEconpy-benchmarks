@@ -1,0 +1,41 @@
+"""Perfect-foresight simulation, scaling over the simulation horizon.
+
+The solver stacks per-period Jacobians into one large sparse system and drives it with a sparse
+Newton iteration, so cost grows with the horizon. The model is built and its steady state solved in
+`setup`; only the simulation is timed.
+"""
+
+from .._support import build_model
+
+LADDER = ["rbc", "medium"]
+HORIZONS = [50, 100, 200]
+
+
+class PerfectForesight:
+    params = [LADDER, HORIZONS]
+    param_names = ["model", "horizon"]
+
+    def setup(self, model, horizon):
+        from gEconpy import solve_perfect_foresight
+
+        self._solve = solve_perfect_foresight
+        self.model = build_model(model)
+        ss = self.model.steady_state(verbose=False)
+
+        # Perturb the first state variable away from its steady state to drive the transition.
+        first_var = self.model.variables[0].base_name
+        self.initial_conditions = {first_var: ss[f"{first_var}_ss"] * 0.9}
+
+    def time_solve(self, model, horizon):
+        self._solve(
+            self.model,
+            simulation_length=horizon,
+            initial_conditions=self.initial_conditions,
+        )
+
+    def peakmem_solve(self, model, horizon):
+        self._solve(
+            self.model,
+            simulation_length=horizon,
+            initial_conditions=self.initial_conditions,
+        )

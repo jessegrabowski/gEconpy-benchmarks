@@ -1,0 +1,40 @@
+# Base / reference environment for benchmarking gEconpy at HEAD.
+#
+# The historical backfill does NOT use this file directly: scripts/gen_locks.py renders a
+# per-commit manifest from this same dependency set, injecting `exclude-newer = <commit date>`
+# and an era-appropriate python, then solves it into locks/<date>_<hash>.lock. gEconpy itself
+# is never a conda dependency here — it is pip-installed from a checkout of the commit under test.
+
+[workspace]
+name = "gEconpy-benchmarks"
+channels = ["conda-forge"]
+platforms = ["osx-arm64", "linux-64"]
+
+[dependencies]
+# Build backend, so `pip install . --no-build-isolation` works inside the env.
+python = ">=3.12"
+pip = "*"
+hatchling = "*"
+hatch-vcs = "*"
+setuptools = "*"
+
+# gEconpy runtime tree (all conda-forge installable).
+numpy = "*"
+scipy = "*"
+numba = "*"
+pandas = "*"
+matplotlib = "*"
+sympy = ">=1.14.0"
+pytensor = ">=3.0.4"
+pymc = ">=6.0.1"
+sympytensor = ">=2.0.1"
+preliz = ">=0.25.0"
+pymc-extras = ">=0.12.0"
+better-optimize = ">=0.4.2"
+pyparsing = "*"
+xarray = "*"
+networkx = "*"
+ipython = "*"
+
+# Benchmark runner.
+asv = ">=0.6.4"
