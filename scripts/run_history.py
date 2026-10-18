@@ -196,7 +196,7 @@ def main(argv=None):
     )
     if failures:
         print(f"\n{failures} commit(s) failed (logged above).", file=sys.stderr)
-    return 0
+    return 1 if failures else 0
 
 
 if __name__ == "__main__":

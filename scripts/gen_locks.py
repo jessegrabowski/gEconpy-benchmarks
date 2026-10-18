@@ -235,7 +235,7 @@ def main(argv=None):
     failures = sum(not generate(c) for c in commits)
     if failures:
         print(f"\n{failures} commit(s) could not be locked (logged above).", file=sys.stderr)
-    return 0
+    return 1 if failures else 0
 
 
 if __name__ == "__main__":
