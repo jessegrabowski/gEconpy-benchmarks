@@ -5,7 +5,7 @@ solver. It complements solvers/ — which times the bare linear algebra — by m
 path a user actually calls.
 """
 
-from .._support import build_model
+from .._support import warm_model
 
 LADDER = ["small", "rbc", "medium", "large"]
 SOLVERS = ["cycle_reduction", "gensys"]
@@ -14,11 +14,11 @@ SOLVERS = ["cycle_reduction", "gensys"]
 class Solve:
     params = [LADDER, SOLVERS]
     param_names = ["model", "solver"]
+    timeout = 900
 
     def setup(self, model, solver):
-        self.model = build_model(model)
-        self.model.steady_state(verbose=False)
-        self.model.solve_model(solver=solver, verbose=False)  # warm linearize compile
+        self.model = warm_model(model)
+        self.model.solve_model(solver=solver, verbose=False)  # relink for this solver
 
     def time_solve(self, model, solver):
         self.model.solve_model(solver=solver, verbose=False)

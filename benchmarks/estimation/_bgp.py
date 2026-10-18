@@ -59,7 +59,7 @@ def _build(observed_states, data, observation_equations=None, temporal_aggregati
             pm.Gamma(f"sigma_{shock}", alpha=2, beta=100)
         for obs in ss_mod.error_states:
             pm.Gamma(f"error_sigma_{obs}", alpha=2, beta=100)
-        ss_mod.build_statespace_graph(data, add_norm_check=False, missing_fill_value=-9999.0)
+        ss_mod.build_statespace_graph(data, add_norm_check=False)
     return model
 
 

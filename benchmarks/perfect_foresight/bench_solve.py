@@ -5,7 +5,7 @@ Newton iteration, so cost grows with the horizon. The model is built and its ste
 `setup`; only the simulation is timed.
 """
 
-from .._support import build_model
+from .._support import warm_model
 
 LADDER = ["rbc", "medium"]
 HORIZONS = [50, 100, 200]
@@ -14,12 +14,13 @@ HORIZONS = [50, 100, 200]
 class PerfectForesight:
     params = [LADDER, HORIZONS]
     param_names = ["model", "horizon"]
+    timeout = 900
 
     def setup(self, model, horizon):
         from gEconpy import solve_perfect_foresight
 
         self._solve = solve_perfect_foresight
-        self.model = build_model(model)
+        self.model = warm_model(model)
         ss = self.model.steady_state(verbose=False)
 
         # Perturb the first state variable away from its steady state to drive the transition.

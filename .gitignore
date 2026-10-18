@@ -295,3 +295,15 @@ poetry.toml
 pyrightconfig.json
 
 # End of https://www.toptal.com/developers/gitignore/api/jetbrains+all,python,macos
+
+### Project-specific ###
+# asv: environments and generated HTML are regenerated; results are committed for the CI publish.
+.asv/env/
+.asv/html/
+# pixi local env dir, the gEconpy clone the history driver checks out, the model reuse cache and its
+# hand-kept copies, and a bare gEconpy mirror at the root.
+.pixi/
+.cache/
+.model_cache*/
+/gEconpy/
+scratch_*.py
