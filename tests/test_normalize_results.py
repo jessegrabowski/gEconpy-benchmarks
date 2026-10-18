@@ -60,3 +60,23 @@ def test_merges_locked_runs_and_skips_other_envs(tmp_path):
     }
     assert merged["env_name"] == merged["python"] == merged["params"]["python"] == "date-locked"
     assert dev.exists()
+
+
+def test_newest_measurement_wins(tmp_path):
+    write_result(tmp_path, "a-rerun.json", LOCKED_ENV, {"bench.time_a": (3.0, 500)})
+    write_result(tmp_path, "b-first.json", LOCKED_ENV, {"bench.time_a": (1.0, 100)})
+
+    normalize_results.normalize_machine(tmp_path)
+
+    assert read_merged(tmp_path)["results"]["bench.time_a"][0] == [3.0]
+
+
+def test_mismatched_column_layouts_raise(tmp_path):
+    write_result(tmp_path, "a-locked.json", LOCKED_ENV, {"bench.time_a": (1.0, 100)})
+    path = write_result(tmp_path, "b-locked.json", LOCKED_ENV, {"bench.time_b": (2.0, 200)})
+    payload = json.loads(path.read_text())
+    payload["result_columns"] = [*COLUMNS, "samples"]
+    path.write_text(json.dumps(payload))
+
+    with pytest.raises(ValueError, match="different column layouts"):
+        normalize_results.normalize_machine(tmp_path)
