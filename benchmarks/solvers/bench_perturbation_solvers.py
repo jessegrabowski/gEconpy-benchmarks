@@ -6,9 +6,7 @@ timing reflects solver scaling over genuine problem sizes rather than synthetic 
 
 import numpy as np
 
-from .._support import solved_matrices
-
-LADDER = ["small", "rbc", "medium", "large"]
+from .._support import LADDER, solved_matrices
 
 
 class _SolverBenchmark:

@@ -1,8 +1,6 @@
 """GCN parsing: the pure-grammar pass versus the full load-to-primitives pass."""
 
-from .._support import gcn_path
-
-LADDER = ["small", "rbc", "medium", "large"]
+from .._support import LADDER, gcn_path
 
 
 class Parse:

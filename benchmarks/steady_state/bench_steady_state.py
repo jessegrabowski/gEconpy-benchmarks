@@ -10,9 +10,7 @@ covers every variable, even when asked for a root solve. Its residual and Jacobi
 `time_root` times the SciPy root solve.
 """
 
-from .._support import warm_model
-
-LADDER = ["small", "rbc", "medium", "large"]
+from .._support import LADDER, warm_model
 
 
 class Analytic:
