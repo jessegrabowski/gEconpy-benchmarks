@@ -1,9 +1,9 @@
 """Shared fixtures and helpers for the gEconpy benchmark suite.
 
-The model ladder spans the realistic size range so scaling behaviour is visible: a minimal
+The model ladder spans the realistic size range so scaling behavior is visible: a minimal
 three-equation NK, a canonical RBC, a full New Keynesian model, and a large multi-sector NK with
-a tax system. Benchmarks pick a subset appropriate to their cost — cold compile/peakmem benches
-stay on the cheaper rungs; pure-numpy solver and warm-eval benches climb higher.
+a tax system. Benchmarks pick a subset appropriate to their cost. Cold compile benches stay on the
+cheaper rungs, and pure-numpy solver and warm-eval benches climb higher.
 """
 
 from pathlib import Path

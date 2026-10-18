@@ -20,7 +20,3 @@ class BuildStatespace:
     def time_build(self, solver):
         ss_mod = make_configured_statespace(solver=solver)
         build_pymc_model(ss_mod, self.data)
-
-    def peakmem_build(self, solver):
-        ss_mod = make_configured_statespace(solver=solver)
-        build_pymc_model(ss_mod, self.data)

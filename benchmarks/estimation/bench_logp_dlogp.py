@@ -34,6 +34,3 @@ class LogpEval:
 
     def time_logp_dlogp(self, solver):
         self._logp_dlogp(self._raveled)
-
-    def peakmem_logp_dlogp(self, solver):
-        self._logp_dlogp(self._raveled)
