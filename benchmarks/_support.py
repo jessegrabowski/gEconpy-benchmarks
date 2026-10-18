@@ -19,7 +19,7 @@ FIXTURES = Path(__file__).resolve().parent / "_fixtures"
 # measured on gEconpy main, and each model has as many equations as variables.
 MODEL_LADDER = {
     "small_linear": "Three_Equation_NK",  # 4 variables, linear, so steady_state() skips the nonlinear solve
-    "small": "Brock_Mirman",  # 5 variables
+    "small_nonlinear": "Brock_Mirman",  # 5 variables
     "rbc": "RBC",  # 9 variables
     "medium": "New_Keynesian",  # 23 variables
     "large": "sims_2024/nk_complete_taxes",  # 33 variables
