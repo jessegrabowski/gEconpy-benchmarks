@@ -47,4 +47,5 @@ pre-commit = "*"
 
 [tasks]
 test = "python -m pytest"
+check-benchmarks = "asv check --python=same"
 lint = "pre-commit run --all-files"
