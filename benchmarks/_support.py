@@ -6,6 +6,8 @@ a tax system. Benchmarks pick a subset appropriate to their cost. Cold compile b
 cheaper rungs, and pure-numpy solver and warm-eval benches climb higher.
 """
 
+import tracemalloc
+
 from pathlib import Path
 
 # GCN files are vendored under _fixtures/ rather than loaded from the installed package: the model
@@ -20,6 +22,19 @@ MODEL_LADDER = {
     "medium": "New_Keynesian",  # ~66 equations
     "large": "sims_2024/nk_complete_taxes",  # ~33 equations after reduction; the largest build
 }
+
+
+def peak_traced_bytes(call):
+    """Run ``call`` and return the peak bytes Python allocated during it, as ``tracemalloc`` traces them.
+
+    NumPy allocations are traced. Memory used by subprocesses, such as C compilation, is not.
+    """
+    tracemalloc.start()
+    try:
+        call()
+        return tracemalloc.get_traced_memory()[1]
+    finally:
+        tracemalloc.stop()
 
 
 def gcn_path(name):
