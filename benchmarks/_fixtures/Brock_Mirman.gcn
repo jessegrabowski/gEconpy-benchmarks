@@ -1,0 +1,68 @@
+tryreduce
+{
+	U[];
+};
+
+
+block STEADY_STATE
+{
+    identities
+    {
+        A[ss] = 1;
+        K[ss] = (alpha * beta) ^ (1 / (1 - alpha));
+        Y[ss] = K[ss] ^ alpha;
+        C[ss] = Y[ss] - K[ss];
+        lambda[ss] = 1 / C[ss];
+        U[ss] = log(C[ss]) / (1 - beta);
+    };
+};
+
+
+block HOUSEHOLD
+{
+	controls
+	{
+		C[], K[];
+	};
+
+	objective
+	{
+		U[] = log(C[]) + beta * E[][U[1]];
+	};
+
+	constraints
+	{
+		# Full depreciation: output not consumed is next period's capital.
+		C[] + K[] = A[] * K[-1] ^ alpha : lambda[];
+	};
+
+	identities
+	{
+		Y[] = A[] * K[-1] ^ alpha;
+	};
+
+	calibration
+	{
+		alpha = 0.33;
+		beta = 0.96;
+	};
+};
+
+
+block TECHNOLOGY_SHOCKS
+{
+    identities
+    {
+        log(A[]) = rho_A * log(A[-1]) + epsilon_A[];
+    };
+
+    shocks
+    {
+        epsilon_A[];
+    };
+
+    calibration
+    {
+		rho_A = 0.95;
+    };
+};
