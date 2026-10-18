@@ -58,6 +58,8 @@ max-complexity = 10
 
 [tool.ruff.lint.isort]
 lines-between-types = 1
+# The package under test, not this repo's code. Without this, a gEconpy/ directory at the root reclassifies it.
+known-third-party = ["gEconpy"]
 
 [tool.ruff.lint.per-file-ignores]
 # asv hashes each benchmark method and its setup into the benchmark version, so lint fixes inside them would

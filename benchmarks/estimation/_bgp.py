@@ -45,9 +45,8 @@ def _build(
     not_loglin_variables=None,
     ss_obs_intercept=None,
 ):
-    import pymc as pm
-
     import gEconpy as ge
+    import pymc as pm
 
     ss_mod = ge.statespace_from_gcn(BGP_GCN, not_loglin_variables=not_loglin_variables, verbose=False)
     ss_mod.configure(
