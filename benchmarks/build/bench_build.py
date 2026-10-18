@@ -6,7 +6,7 @@ estimation/. Because no compilation happens here, building a fresh model each ca
 cold measurement with no shared state.
 """
 
-from .._support import gcn_path
+from .._support import gcn_path, peak_traced_bytes
 
 LADDER = ["small", "rbc", "medium", "large"]
 
@@ -24,3 +24,21 @@ class Build:
 
     def time_build(self, model):
         self._build(self.path, verbose=False)
+
+
+class BuildMemory:
+    params = [LADDER]
+    param_names = ["model"]
+    timeout = 900
+    unit = "bytes"
+
+    def setup(self, model):
+        from gEconpy.model.build import model_from_gcn
+
+        self._build = model_from_gcn
+        self.path = gcn_path(model)
+        # The first build in a process also allocates lazily imported modules and one-time caches.
+        self._build(self.path, verbose=False)
+
+    def track_build_peak_bytes(self, model):
+        return peak_traced_bytes(lambda: self._build(self.path, verbose=False))
