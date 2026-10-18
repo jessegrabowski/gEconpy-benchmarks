@@ -141,9 +141,23 @@ def ensure_clone():
     run(["git", "-C", str(GECONPY_CLONE), "fetch", "--all", "--tags", "--prune"])
 
 
+def full_hash(commit):
+    """Resolve a commit name to its full hash in the gEconpy clone, raising ValueError if git can't."""
+    command = ["git", "-C", str(GECONPY_CLONE), "rev-parse", "--verify", "--quiet", f"{commit}^{{commit}}"]
+    try:
+        return run(command).strip()
+    except subprocess.CalledProcessError:
+        raise ValueError(f"{commit!r} is not a commit in {GECONPY_CLONE}") from None
+
+
+def manifest_path(lock):
+    """Return where the manifest a lock was solved from is stored."""
+    return lock.with_suffix(".toml")
+
+
 def resolve_commits(args):
     if args.commits:
-        return [commit.strip() for commit in args.commits]
+        return [full_hash(commit.strip()) for commit in args.commits]
     commits = run(["git", "-C", str(GECONPY_CLONE), "rev-list", "--reverse", args.range or "main"]).split()
     if args.steps and args.steps < len(commits):
         step = len(commits) / args.steps
@@ -215,6 +229,7 @@ def generate(commit):
                 continue
             out = LOCKS_DIR / f"{date}_{commit[:10]}_py{python}.lock"
             shutil.copy(tmp / "pixi.lock", out)
+            shutil.copy(tmp / "pixi.toml", manifest_path(out))
             print(f"  locked {date} {commit[:10]} py{python}")
             return True
     print(f"  FAIL   {date} {commit[:10]} (tried py{', py'.join(pythons)}): {last_err}")
@@ -235,7 +250,7 @@ def main(argv=None):
     failures = sum(not generate(c) for c in commits)
     if failures:
         print(f"\n{failures} commit(s) could not be locked (logged above).", file=sys.stderr)
-    return 0
+    return 1 if failures else 0
 
 
 if __name__ == "__main__":

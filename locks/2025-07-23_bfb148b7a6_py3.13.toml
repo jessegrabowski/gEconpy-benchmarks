@@ -1,0 +1,33 @@
+[workspace]
+name = "gEconpy-bench-locked"
+channels = ["conda-forge"]
+platforms = ["osx-arm64", "linux-64"]
+exclude-newer = "2025-07-23"
+
+[dependencies]
+python = "3.13.*"
+asv = "*"
+cloudpickle = "*"
+ipython = "*"
+joblib = "*"
+matplotlib = "*"
+numba = "*"
+numpy = "*"
+pandas = "*"
+pip = "*"
+preliz = "*"
+pymc = "*"
+pymc-extras = "*"
+pyparsing = "*"
+pytensor = "*"
+scipy = "*"
+setuptools = "*"
+sympy = "*"
+sympytensor = "*"
+versioneer = "*"
+xarray = "*"
+
+[exclude-newer]
+libgfortran = "0d"
+libgfortran5 = "0d"
+libopenblas = "0d"

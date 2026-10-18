@@ -1,3 +1,7 @@
+import argparse
+
+from pathlib import Path
+
 import gen_locks
 import pytest
 
@@ -82,3 +86,38 @@ def test_candidate_pythons_respects_spec_and_date(monkeypatch, requires_python, 
     use_files(monkeypatch, {"pyproject.toml": project})
     monkeypatch.setattr(gen_locks, "commit_date", lambda _commit: date)
     assert gen_locks.candidate_pythons("abc") == expected
+
+
+def test_generate_stores_the_solved_manifest_beside_the_lock(tmp_path, monkeypatch):
+    monkeypatch.setattr(gen_locks, "LOCKS_DIR", tmp_path)
+    monkeypatch.setattr(gen_locks, "commit_date", lambda _commit: "2026-01-01")
+    monkeypatch.setattr(gen_locks, "candidate_pythons", lambda _commit: ["3.13"])
+    monkeypatch.setattr(gen_locks, "full_deps", lambda _commit: {"numpy"})
+
+    def fake_pixi_lock(command):
+        manifest = command[command.index("--manifest-path") + 1]
+        (Path(manifest).parent / "pixi.lock").write_text("solved lock")
+        return ""
+
+    monkeypatch.setattr(gen_locks, "run", fake_pixi_lock)
+
+    assert gen_locks.generate("a" * 40)
+    lock = tmp_path / "2026-01-01_aaaaaaaaaa_py3.13.lock"
+    assert lock.read_text() == "solved lock"
+    assert gen_locks.manifest_path(lock).read_text() == gen_locks.manifest("2026-01-01", "3.13", {"numpy"})
+
+
+@pytest.mark.parametrize(("failing", "exit_code"), [(set(), 0), ({"b" * 40}, 1)], ids=["all-succeed", "one-fails"])
+def test_main_exit_code_reports_failures(tmp_path, monkeypatch, failing, exit_code):
+    monkeypatch.setattr(gen_locks, "LOCKS_DIR", tmp_path)
+    monkeypatch.setattr(gen_locks, "ensure_clone", lambda: None)
+    monkeypatch.setattr(gen_locks, "resolve_commits", lambda _args: ["a" * 40, "b" * 40])
+    monkeypatch.setattr(gen_locks, "generate", lambda commit: commit not in failing)
+
+    assert gen_locks.main([]) == exit_code
+
+
+def test_resolve_commits_expands_short_hashes(clone):
+    args = argparse.Namespace(commits=[clone[:7]], range=None, steps=None)
+
+    assert gen_locks.resolve_commits(args) == [clone]

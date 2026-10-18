@@ -65,13 +65,19 @@ def env_dir(commit):
     return ENVS_CACHE / commit[:10]
 
 
+def locked_manifest(commit, lock, python):
+    """Return the manifest ``lock`` was solved from, rebuilding it for locks that predate stored manifests."""
+    stored = gen_locks.manifest_path(lock)
+    if stored.exists():
+        return stored.read_text()
+    return gen_locks.manifest(gen_locks.commit_date(commit), python, gen_locks.full_deps(commit))
+
+
 def build_env(commit, lock, python):
-    """Reconstruct the date-locked env from its lock; return the env's python path."""
-    date = gen_locks.commit_date(commit)
+    """Reconstruct the date-locked env from its lock and return the env's python path."""
     work = env_dir(commit)
     work.mkdir(parents=True, exist_ok=True)
-    # Rebuild the exact manifest gen_locks used, so `pixi install --locked` matches the stored lock.
-    (work / "pixi.toml").write_text(gen_locks.manifest(date, python, gen_locks.full_deps(commit)))
+    (work / "pixi.toml").write_text(locked_manifest(commit, lock, python))
     (work / "pixi.lock").write_bytes(lock.read_bytes())
     run(["pixi", "install", "--locked", "--manifest-path", str(work / "pixi.toml")])
     py = work / ".pixi" / "envs" / "default" / "bin" / "python"
@@ -153,16 +159,22 @@ def process(commit, lock, python, machine, asv_args, rerun=False):
 
 
 def resolve(args, locks):
-    """Return a list of (commit, lock_path, python) to benchmark, in history order."""
+    """Split the requested commits into benchmark targets and commits that have no lock.
+
+    Returns
+    -------
+    targets : list of tuple
+        ``(commit, lock_path, python)`` for each commit to benchmark, in history order.
+    unlocked : list of str
+        Full hashes of commits named by ``--commits`` that have no lock.
+    """
+    gen_locks.ensure_clone()
+    unlocked = []
     if args.commits:
-        wanted = []
-        for requested in args.commits:
-            candidates = (short for short in locks if short.startswith(requested) or requested.startswith(short))
-            match = next(candidates, None)
-            if match:
-                wanted.append((requested, *locks[match]))
+        requested = [gen_locks.full_hash(commit) for commit in args.commits]
+        wanted = [(full, *locks[full[:10]]) for full in requested if full[:10] in locks]
+        unlocked = [full for full in requested if full[:10] not in locks]
     else:
-        gen_locks.ensure_clone()
         order = gen_locks.run(
             ["git", "-C", str(gen_locks.GECONPY_CLONE), "rev-list", "--reverse", args.range or "main"]
         ).split()
@@ -170,7 +182,7 @@ def resolve(args, locks):
     if args.steps and args.steps < len(wanted):
         step = len(wanted) / args.steps
         wanted = [wanted[int(i * step)] for i in range(args.steps)]
-    return wanted
+    return wanted, unlocked
 
 
 def main(argv=None):
@@ -189,14 +201,16 @@ def main(argv=None):
     if not locks:
         print("No locks found. Run gen_locks.py first.", file=sys.stderr)
         return 1
-    targets = resolve(args, locks)
+    targets, unlocked = resolve(args, locks)
+    for commit in unlocked:
+        print(f"  FAIL   {commit[:10]} (no lock; run gen_locks.py --commits {commit[:10]} first)")
     print(f"Benchmarking {len(targets)} commit(s) on machine {machine!r}")
-    failures = sum(
+    failures = len(unlocked) + sum(
         not process(commit, lock, python, machine, args.asv_args, rerun=args.rerun) for commit, lock, python in targets
     )
     if failures:
         print(f"\n{failures} commit(s) failed (logged above).", file=sys.stderr)
-    return 0
+    return 1 if failures else 0
 
 
 if __name__ == "__main__":

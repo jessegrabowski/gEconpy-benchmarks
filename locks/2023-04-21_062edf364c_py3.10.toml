@@ -1,0 +1,27 @@
+[workspace]
+name = "gEconpy-bench-locked"
+channels = ["conda-forge"]
+platforms = ["osx-arm64", "linux-64"]
+exclude-newer = "2023-04-21"
+
+[dependencies]
+python = "3.10.*"
+arviz = "*"
+asv = "*"
+cloudpickle = "*"
+emcee = "*"
+joblib = "*"
+matplotlib = "*"
+numba = "*"
+numpy = "*"
+pip = "*"
+pyparsing = "*"
+scipy = "*"
+setuptools = "*"
+statsmodels = "*"
+sympy = "*"
+
+[exclude-newer]
+libgfortran = "0d"
+libgfortran5 = "0d"
+libopenblas = "0d"
