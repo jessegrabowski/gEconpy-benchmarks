@@ -1,8 +1,10 @@
 """Perfect-foresight simulation, scaling over the simulation horizon.
 
 The solver stacks per-period Jacobians into one large sparse system and drives it with a sparse
-Newton iteration, so cost grows with the horizon. The model is built and its steady state solved in
-`setup`; only the simulation is timed.
+Newton iteration, so cost grows with the horizon. `setup` builds the model, solves its steady state, and
+runs the simulation once. Only the simulation is timed. From gEconpy commit 307dff2 on, the
+compiled problem is cached on the model, so `time_solve` times the solve alone. Before it, every call
+also recompiles the problem.
 """
 
 from .._support import warm_model
@@ -23,9 +25,9 @@ class PerfectForesight:
         self.model = warm_model(model)
         ss = self.model.steady_state(verbose=False)
 
-        # Perturb the first state variable away from its steady state to drive the transition.
-        first_var = self.model.variables[0].base_name
-        self.initial_conditions = {first_var: ss[f"{first_var}_ss"] * 0.9}
+        # Capital is a predetermined state in every model on this ladder.
+        self.initial_conditions = {"K": ss["K_ss"] * 0.9}
+        self._solve(self.model, simulation_length=horizon, initial_conditions=self.initial_conditions)
 
     def time_solve(self, model, horizon):
         self._solve(
