@@ -37,9 +37,7 @@ class Statistics:
         self._autocovariance_matrix(self.model, T=self.T, R=self.R, shock_std=1.0, n_lags=10)
 
     def time_impulse_response(self, model):
-        self._impulse_response_function(
-            self.model, T=self.T, R=self.R, simulation_length=40, shock_size=1.0
-        )
+        self._impulse_response_function(self.model, T=self.T, R=self.R, simulation_length=40, shock_size=1.0)
 
     def time_simulate(self, model):
         self._simulate(self.model, T=self.T, R=self.R, simulation_length=100, shock_std=1.0)

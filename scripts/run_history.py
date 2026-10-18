@@ -15,10 +15,12 @@ Usage::
 """
 
 import argparse
+import json
 import platform
 import shutil
 import subprocess
 import sys
+
 from pathlib import Path
 
 import gen_locks  # sibling module; provides clone + manifest helpers
@@ -33,8 +35,6 @@ def run(cmd, **kw):
 
 
 def machine_name():
-    import json
-
     cfg = Path.home() / ".asv-machine.json"
     if cfg.exists():
         data = json.loads(cfg.read_text())
@@ -86,17 +86,39 @@ def install_geconpy(commit, python):
     # and the date-locked asv in pre-2024 envs predates the asv/asv_runner split, which the current
     # orchestrator requires. Installed on top of the locked env so no re-lock is needed.
     run([str(python), "-m", "pip", "install", "-U", "asv>=0.6.4", "--quiet"])
-    run([str(python), "-m", "pip", "install", str(gen_locks.GECONPY_CLONE),
-         "--no-build-isolation", "--quiet", "--no-deps"])
+    run(
+        [
+            str(python),
+            "-m",
+            "pip",
+            "install",
+            str(gen_locks.GECONPY_CLONE),
+            "--no-build-isolation",
+            "--quiet",
+            "--no-deps",
+        ]
+    )
 
 
 def benchmark(commit, python, machine, asv_args):
-    run(["asv", "run", f"--python={python}", "--set-commit-hash", commit,
-         "--machine", machine, "--show-stderr", *asv_args], cwd=str(REPO_ROOT))
+    run(
+        [
+            "asv",
+            "run",
+            f"--python={python}",
+            "--set-commit-hash",
+            commit,
+            "--machine",
+            machine,
+            "--show-stderr",
+            *asv_args,
+        ],
+        cwd=str(REPO_ROOT),
+    )
 
 
 def installable(commit):
-    """True if the commit has a pip-installable packaging file (setup.py / pyproject) at its root.
+    """Return True if the commit has a pip-installable packaging file (setup.py / pyproject) at its root.
 
     Pre-packaging commits (early-2021..~2022 prototype era) ran from source and can't be installed;
     checking the git tree first skips them instantly instead of building an env that then fails.
@@ -156,9 +178,9 @@ def main(argv=None):
     p.add_argument("--range", help="git rev-list range (default: main)")
     p.add_argument("--steps", type=int, help="evenly-spaced subset")
     p.add_argument("--commits", nargs="+", help="explicit commit hashes")
-    p.add_argument("--rerun",
-                   action="store_true",
-                   help="benchmark even commits that already have results (e.g. to add benchmarks)")
+    p.add_argument(
+        "--rerun", action="store_true", help="benchmark even commits that already have results (e.g. to add benchmarks)"
+    )
     p.add_argument("asv_args", nargs="*", help="extra args passed through to `asv run`")
     args = p.parse_args(argv)
 
@@ -170,8 +192,7 @@ def main(argv=None):
     targets = resolve(args, locks)
     print(f"Benchmarking {len(targets)} commit(s) on machine {machine!r}")
     failures = sum(
-        not process(commit, lock, python, machine, args.asv_args, rerun=args.rerun)
-        for commit, lock, python in targets
+        not process(commit, lock, python, machine, args.asv_args, rerun=args.rerun) for commit, lock, python in targets
     )
     if failures:
         print(f"\n{failures} commit(s) failed (logged above).", file=sys.stderr)
