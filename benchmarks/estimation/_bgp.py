@@ -36,8 +36,15 @@ def _annual_in_quarterly(column, n=64):
     return data
 
 
-def _build(observed_states, data, observation_equations=None, temporal_aggregation=None,
-           aggregation_period=4, not_loglin_variables=None, ss_obs_intercept=None):
+def _build(
+    observed_states,
+    data,
+    observation_equations=None,
+    temporal_aggregation=None,
+    aggregation_period=4,
+    not_loglin_variables=None,
+    ss_obs_intercept=None,
+):
     import gEconpy as ge
     import pymc as pm
 
@@ -74,7 +81,7 @@ def observation_equations_model():
 
 
 def frequency_change_model():
-    """A quarterly growth rate aggregated to an annual observation (mixed-frequency)."""
+    """Build a model whose quarterly growth rate is observed as an annual sum (mixed-frequency)."""
     obs_eqs = {"dlog_Y_annual": "log(Y[] / Y[-1] * G[])"}
     return _build(
         ["dlog_Y_annual"],
@@ -86,7 +93,7 @@ def frequency_change_model():
 
 
 def mixed_loglin_model():
-    """The net rate ``R_f`` stays in levels while a level observable is log-linearised."""
+    """Build a model that keeps the net rate ``R_f`` in levels while log-linearizing a level observable."""
     obs_eqs = {"log_Y": "log(Y[])"}
     return _build(
         ["R_f", "log_Y"],

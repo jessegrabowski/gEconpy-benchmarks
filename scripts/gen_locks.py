@@ -23,6 +23,7 @@ import subprocess
 import sys
 import tempfile
 import tomllib
+
 from pathlib import Path
 
 from packaging.specifiers import InvalidSpecifier, SpecifierSet
@@ -204,8 +205,8 @@ def generate(commit):
     deps = full_deps(commit)
     last_err = ""
     for python in pythons:
-        with tempfile.TemporaryDirectory() as tmp:
-            tmp = Path(tmp)
+        with tempfile.TemporaryDirectory() as tmp_name:
+            tmp = Path(tmp_name)
             (tmp / "pixi.toml").write_text(manifest(date, python, deps))
             try:
                 run(["pixi", "lock", "--manifest-path", str(tmp / "pixi.toml")])

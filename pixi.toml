@@ -40,3 +40,11 @@ cloudpickle = "*"
 
 # Benchmark runner.
 asv = ">=0.6.4"
+
+# Tests and lint for the harness itself.
+pytest = ">=9.0"
+pre-commit = "*"
+
+[tasks]
+test = "python -m pytest"
+lint = "pre-commit run --all-files"

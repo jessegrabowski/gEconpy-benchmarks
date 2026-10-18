@@ -1,0 +1,30 @@
+exclude: ^(locks/|\.asv/|pixi\.lock$)
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v6.0.0
+  hooks:
+    -   id: check-merge-conflict
+    -   id: check-toml
+    -   id: check-yaml
+    -   id: end-of-file-fixer
+    -   id: no-commit-to-branch
+        args: [--branch, main]
+    -   id: trailing-whitespace
+    -   id: check-case-conflict
+    -   id: check-added-large-files
+
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.16.7
+  hooks:
+    - id: ruff-format
+    - id: ruff
+      args: [ --fix, --unsafe-fixes, --exit-non-zero-on-fix ]
+
+- repo: local
+  hooks:
+    - id: pixi-lock-check
+      name: pixi.lock is in sync with pixi.toml
+      entry: pixi lock --check
+      language: system
+      files: ^(pixi\.toml|pixi\.lock)$
+      pass_filenames: false

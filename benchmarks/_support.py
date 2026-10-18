@@ -15,9 +15,9 @@ FIXTURES = Path(__file__).resolve().parent / "_fixtures"
 
 # name -> vendored GCN stem (relative to _fixtures/)
 MODEL_LADDER = {
-    "small": "Three_Equation_NK",   # ~15 equations
-    "rbc": "RBC",                    # ~26 equations
-    "medium": "New_Keynesian",       # ~66 equations
+    "small": "Three_Equation_NK",  # ~15 equations
+    "rbc": "RBC",  # ~26 equations
+    "medium": "New_Keynesian",  # ~66 equations
     "large": "sims_2024/nk_complete_taxes",  # ~33 equations after reduction; the largest build
 }
 

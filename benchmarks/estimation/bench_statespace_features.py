@@ -14,7 +14,6 @@ from ._bgp import (
     warmed_logp_dlogp,
 )
 
-
 # Building the BGP logp+gradient compiles a large graph (tens of seconds); raise the per-benchmark
 # timeout well above asv's 60s default so the untimed setup compile does not trip it.
 TIMEOUT = 1200
