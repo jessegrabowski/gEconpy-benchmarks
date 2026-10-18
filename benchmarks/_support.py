@@ -1,6 +1,6 @@
 """Shared fixtures and helpers for the gEconpy benchmark suite.
 
-The model ladder spans the realistic size range so scaling behavior is visible: a minimal
+The model ladder spans the realistic size range so scaling behavior is visible: a linear
 three-equation NK, a canonical RBC, a full New Keynesian model, and a large multi-sector NK with
 a tax system. Benchmarks pick a subset appropriate to their cost. Cold compile benches stay on the
 cheaper rungs, and pure-numpy solver and warm-eval benches climb higher.
@@ -18,7 +18,7 @@ FIXTURES = Path(__file__).resolve().parent / "_fixtures"
 # name -> vendored GCN stem (relative to _fixtures/), smallest first. Sizes count variables after reduction, as
 # measured on gEconpy main, and each model has as many equations as variables.
 MODEL_LADDER = {
-    "small": "Three_Equation_NK",  # 4 variables
+    "small_linear": "Three_Equation_NK",  # 4 variables, linear, so steady_state() skips the nonlinear solve
     "rbc": "RBC",  # 9 variables
     "medium": "New_Keynesian",  # 23 variables
     "large": "sims_2024/nk_complete_taxes",  # 33 variables
