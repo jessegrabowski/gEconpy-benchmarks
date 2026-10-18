@@ -1,4 +1,5 @@
 import argparse
+import subprocess
 
 from pathlib import Path
 
@@ -121,3 +122,14 @@ def test_resolve_commits_expands_short_hashes(clone):
     args = argparse.Namespace(commits=[clone[:7]], range=None, steps=None)
 
     assert gen_locks.resolve_commits(args) == [clone]
+
+
+def test_resolve_commits_defaults_to_the_fetched_remote_branch(clone):
+    git = ["git", "-C", str(gen_locks.GECONPY_CLONE), "-c", "user.name=test", "-c", "user.email=test@example.com"]
+    subprocess.run([*git, "commit", "--quiet", "--allow-empty", "-m", "fetched commit"], check=True)
+    fetched = subprocess.run([*git, "rev-parse", "HEAD"], check=True, capture_output=True, text=True).stdout.strip()
+    # A fetch moves origin/main and leaves the clone's local main where it was.
+    subprocess.run([*git, "update-ref", "refs/remotes/origin/main", fetched], check=True)
+    subprocess.run([*git, "update-ref", "refs/heads/main", clone], check=True)
+
+    assert gen_locks.resolve_commits(argparse.Namespace(commits=None, range=None, steps=None)) == [clone, fetched]

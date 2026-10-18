@@ -9,7 +9,7 @@ from a checkout of the commit at run time (see ``run_history.py``).
 
 Usage::
 
-    python scripts/gen_locks.py                       # every commit on main
+    python scripts/gen_locks.py                       # every commit on the clone's origin/main
     python scripts/gen_locks.py --range v0.1..main    # a git range
     python scripts/gen_locks.py --steps 40            # evenly spaced subset
     python scripts/gen_locks.py --commits abc123 def456
@@ -32,6 +32,8 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 LOCKS_DIR = REPO_ROOT / "locks"
 GECONPY_URL = "https://github.com/jessegrabowski/gEconpy.git"
 GECONPY_CLONE = REPO_ROOT / ".cache" / "gEconpy"
+# ensure_clone only fetches, which never moves the clone's local main, so ranges default to the remote-tracking branch.
+DEFAULT_RANGE = "origin/main"
 
 # Python minor versions we build against, newest-first, each tagged with its release date. A
 # candidate is only considered for a commit if it had been released by the commit's date -- otherwise
@@ -158,7 +160,7 @@ def manifest_path(lock):
 def resolve_commits(args):
     if args.commits:
         return [full_hash(commit.strip()) for commit in args.commits]
-    commits = run(["git", "-C", str(GECONPY_CLONE), "rev-list", "--reverse", args.range or "main"]).split()
+    commits = run(["git", "-C", str(GECONPY_CLONE), "rev-list", "--reverse", args.range or DEFAULT_RANGE]).split()
     if args.steps and args.steps < len(commits):
         step = len(commits) / args.steps
         commits = [commits[int(i * step)] for i in range(args.steps)]
@@ -238,7 +240,7 @@ def generate(commit):
 
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--range", help="git rev-list range (default: main)")
+    p.add_argument("--range", help=f"git rev-list range (default: {DEFAULT_RANGE})")
     p.add_argument("--steps", type=int, help="evenly-spaced subset of the range")
     p.add_argument("--commits", nargs="+", help="explicit commit hashes")
     args = p.parse_args(argv)

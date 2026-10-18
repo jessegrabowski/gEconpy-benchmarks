@@ -64,3 +64,18 @@ def test_locked_manifest_prefers_the_stored_one(tmp_path, monkeypatch, stored):
 
     expected = "stored manifest" if stored else gen_locks.manifest("2026-01-01", "3.13", {"numpy"})
     assert run_history.locked_manifest("a" * 40, lock, "3.13") == expected
+
+
+def test_resolve_defaults_to_the_fetched_remote_branch(clone, tmp_path):
+    git = ["git", "-C", str(gen_locks.GECONPY_CLONE), "-c", "user.name=test", "-c", "user.email=test@example.com"]
+    subprocess.run([*git, "commit", "--quiet", "--allow-empty", "-m", "fetched commit"], check=True)
+    fetched = subprocess.run([*git, "rev-parse", "HEAD"], check=True, capture_output=True, text=True).stdout.strip()
+    # A fetch moves origin/main and leaves the clone's local main where it was.
+    subprocess.run([*git, "update-ref", "refs/remotes/origin/main", fetched], check=True)
+    subprocess.run([*git, "update-ref", "refs/heads/main", clone], check=True)
+    locks = {commit[:10]: (tmp_path / f"{commit[:10]}.lock", "3.13") for commit in (clone, fetched)}
+
+    targets, unlocked = run_history.resolve(argparse.Namespace(commits=None, range=None, steps=None), locks)
+
+    assert [commit for commit, _, _ in targets] == [clone, fetched]
+    assert unlocked == []
