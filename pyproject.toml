@@ -70,7 +70,7 @@ known-third-party = ["gEconpy"]
     "TID252",  # relative imports, several inside hashed setup bodies
 ]
 "benchmarks/crossover/bench_core.py" = [
-    "D401",    # time_build_solve's docstring is hashed and carries 145 recorded points
+    "D401",    # time_build_solve's docstring is hashed, and Crossover's history must survive
 ]
 "scripts/*" = [
     "T201",    # command-line progress output
