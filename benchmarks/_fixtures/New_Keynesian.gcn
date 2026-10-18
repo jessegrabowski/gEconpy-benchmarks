@@ -150,7 +150,7 @@ block WAGE_SETTING
 
 	calibration
 	{
-		psi_w ~ Exponential(lambda=1) 	= 0.782;	# Markup parameter -> psi_w = 1 / (elasticity - 1)
+		psi_w ~ Exponential(lam=1) 	= 0.782;	# Markup parameter -> psi_w = 1 / (elasticity - 1)
 		                                            # 0 -> perfect substitutes, oo -> Cobb Douglas
 		eta_w ~ Beta(alpha=4, beta=1)  	= 0.75;		# Probability of not receiving the update signal
 	};
@@ -249,7 +249,7 @@ block FIRM_PRICE_SETTING_PROBLEM
 
 	calibration
 	{
-		psi_p ~ Exponential(lambda=1)  = 0.6; #Markup parameter: 0 -> perfect substitutes, oo -> Cobb Douglas
+		psi_p ~ Exponential(lam=1)  = 0.6; #Markup parameter: 0 -> perfect substitutes, oo -> Cobb Douglas
 		eta_p ~ Beta(alpha=13, beta=2)  = 0.75;
 	};
 };
