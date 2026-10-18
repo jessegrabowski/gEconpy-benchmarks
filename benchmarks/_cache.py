@@ -1,17 +1,19 @@
 """Disk-backed reuse of compiled models, so eval/solve benchmarks don't recompile every run.
 
-asv runs each benchmark in its own subprocess, so an in-memory cache can't span benchmarks; the
-cache must live on disk. Entries are content-addressed by the GCN bytes, the gEconpy version, and a
-caller-supplied tag, so a reloaded model always matches the code under test: a new commit (new
-version) misses and rebuilds. cloudpickle handles the compiled PyTensor functions (a compiled RBC
-model is ~0.1MB and reloads ~50x faster than rebuilding).
+asv runs each benchmark in its own subprocess, so an in-memory cache can't span benchmarks and the cache lives on disk.
+Entries are content-addressed by the GCN bytes, the gEconpy, pytensor and Python versions, and a caller-supplied
+tag, so a reloaded model always matches the code under test: a new commit (new version) misses and
+rebuilds. cloudpickle handles the compiled PyTensor functions (a compiled RBC model is ~0.1MB and reloads ~50x faster
+than rebuilding).
 
 Compile-measurement benchmarks deliberately bypass this cache, because they build fresh to time the
 compilation.
 """
 
 import hashlib
+import sys
 
+from importlib import metadata
 from pathlib import Path
 
 import cloudpickle
@@ -27,9 +29,19 @@ def _gEconpy_version():
     return getattr(gEconpy, "__version__", "unknown")
 
 
-def _key(tag, gcn_path):
+def _stack_versions():
+    try:
+        pytensor = metadata.version("pytensor")
+    except metadata.PackageNotFoundError:
+        pytensor = "none"
+    python = f"{sys.version_info.major}.{sys.version_info.minor}"
+    return {"gEconpy": _gEconpy_version(), "pytensor": pytensor, "python": python}
+
+
+def _key(tag, gcn_path, stack):
     digest = hashlib.sha1(Path(gcn_path).read_bytes()).hexdigest()[:12]
-    return f"{tag.replace('/', '_')}__{_gEconpy_version()}__{digest}"
+    versions = f"{stack['gEconpy']}__pt{stack['pytensor']}__py{stack['python']}"
+    return f"{tag.replace('/', '_')}__{versions}__{digest}"
 
 
 def load_or_build(tag, gcn_path, builder):
@@ -37,7 +49,8 @@ def load_or_build(tag, gcn_path, builder):
 
     ``builder`` is a zero-argument callable invoked only on a cache miss.
     """
-    key = _key(tag, gcn_path)
+    stack = _stack_versions()
+    key = _key(tag, gcn_path, stack)
     if key in _MEMO:
         return _MEMO[key]
 

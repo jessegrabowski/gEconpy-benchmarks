@@ -2,6 +2,8 @@ import pytest
 
 from benchmarks import _cache
 
+STACK = {"gEconpy": "2.0.0", "pytensor": "3.2.4", "python": "3.13"}
+
 
 class Unpicklable:
     def __reduce__(self):
@@ -13,7 +15,7 @@ def cache_dir(tmp_path, monkeypatch):
     directory = tmp_path / "cache"
     monkeypatch.setattr(_cache, "CACHE_DIR", directory)
     monkeypatch.setattr(_cache, "_MEMO", {})
-    monkeypatch.setattr(_cache, "_gEconpy_version", lambda: "2.0.0")
+    monkeypatch.setattr(_cache, "_stack_versions", lambda: dict(STACK))
     return directory
 
 
@@ -48,11 +50,14 @@ def test_editing_the_gcn_misses(gcn_file):
 
 
 @pytest.mark.usefixtures("cache_dir")
-def test_new_gEconpy_version_misses(gcn_file, monkeypatch):
-    _cache.load_or_build("warm", gcn_file, lambda: "built by 2.0.0")
-    monkeypatch.setattr(_cache, "_gEconpy_version", lambda: "2.0.1")
+@pytest.mark.parametrize(
+    ("component", "new_version"), [("gEconpy", "2.0.1"), ("pytensor", "3.3.0"), ("python", "3.14")]
+)
+def test_new_stack_version_misses(gcn_file, monkeypatch, component, new_version):
+    _cache.load_or_build("warm", gcn_file, lambda: "old stack")
+    monkeypatch.setattr(_cache, "_stack_versions", lambda: {**STACK, component: new_version})
 
-    assert _cache.load_or_build("warm", gcn_file, lambda: "built by 2.0.1") == "built by 2.0.1"
+    assert _cache.load_or_build("warm", gcn_file, lambda: "new stack") == "new stack"
 
 
 def test_failed_dump_publishes_no_entry(cache_dir, gcn_file):
