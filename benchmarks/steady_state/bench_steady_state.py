@@ -1,7 +1,9 @@
 """Steady-state computation: analytic closed-form evaluation versus a numerical root solve.
 
 All ladder models ship an analytic STEADY_STATE block. The analytic path compiles a closed-form
-function once (warmed in `setup`) and then evaluates it, so `time_analytic` isolates evaluation.
+function once (warmed in `setup`) and then evaluates it. Each call also checks the residuals of the
+solution. Before gEconpy commit 9a8300b that check recompiled the residual function on every call, so
+on those commits `time_analytic` is dominated by the compile.
 The numeric path additionally runs a SciPy root solve over a compiled residual/Jacobian; the
 compile is warmed in `setup`, so `time_root` isolates the solve loop.
 """
