@@ -159,11 +159,13 @@ def process(commit, lock, python, machine, asv_args, rerun=False):
 
 
 def resolve(args, locks):
-    """Return a list of (commit, lock_path, python) to benchmark, in history order."""
+    """Return the (commit, lock_path, python) targets in history order, and the requested commits that have no lock."""
     gen_locks.ensure_clone()
+    unlocked = []
     if args.commits:
         requested = [gen_locks.full_hash(commit) for commit in args.commits]
         wanted = [(full, *locks[full[:10]]) for full in requested if full[:10] in locks]
+        unlocked = [full for full in requested if full[:10] not in locks]
     else:
         order = gen_locks.run(
             ["git", "-C", str(gen_locks.GECONPY_CLONE), "rev-list", "--reverse", args.range or "main"]
@@ -172,7 +174,7 @@ def resolve(args, locks):
     if args.steps and args.steps < len(wanted):
         step = len(wanted) / args.steps
         wanted = [wanted[int(i * step)] for i in range(args.steps)]
-    return wanted
+    return wanted, unlocked
 
 
 def main(argv=None):
@@ -191,9 +193,11 @@ def main(argv=None):
     if not locks:
         print("No locks found. Run gen_locks.py first.", file=sys.stderr)
         return 1
-    targets = resolve(args, locks)
+    targets, unlocked = resolve(args, locks)
+    for commit in unlocked:
+        print(f"  FAIL   {commit[:10]} (no lock; run gen_locks.py --commits {commit[:10]} first)")
     print(f"Benchmarking {len(targets)} commit(s) on machine {machine!r}")
-    failures = sum(
+    failures = len(unlocked) + sum(
         not process(commit, lock, python, machine, args.asv_args, rerun=args.rerun) for commit, lock, python in targets
     )
     if failures:
