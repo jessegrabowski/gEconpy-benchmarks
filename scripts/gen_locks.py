@@ -150,6 +150,11 @@ def full_hash(commit):
         raise ValueError(f"{commit!r} is not a commit in {GECONPY_CLONE}") from None
 
 
+def manifest_path(lock):
+    """Return where the manifest a lock was solved from is stored."""
+    return lock.with_suffix(".toml")
+
+
 def resolve_commits(args):
     if args.commits:
         return [full_hash(commit.strip()) for commit in args.commits]
@@ -224,6 +229,7 @@ def generate(commit):
                 continue
             out = LOCKS_DIR / f"{date}_{commit[:10]}_py{python}.lock"
             shutil.copy(tmp / "pixi.lock", out)
+            shutil.copy(tmp / "pixi.toml", manifest_path(out))
             print(f"  locked {date} {commit[:10]} py{python}")
             return True
     print(f"  FAIL   {date} {commit[:10]} (tried py{', py'.join(pythons)}): {last_err}")

@@ -1,5 +1,6 @@
 import argparse
 
+import gen_locks
 import pytest
 import run_history
 
@@ -29,3 +30,15 @@ def test_main_exit_code_reports_failures(monkeypatch, failing, exit_code):
     monkeypatch.setattr(run_history, "process", lambda commit, *_args, **_kwargs: commit not in failing)
 
     assert run_history.main([]) == exit_code
+
+
+@pytest.mark.parametrize("stored", [True, False], ids=["stored-manifest", "rebuilt-manifest"])
+def test_locked_manifest_prefers_the_stored_one(tmp_path, monkeypatch, stored):
+    lock = tmp_path / "2026-01-01_aaaaaaaaaa_py3.13.lock"
+    if stored:
+        gen_locks.manifest_path(lock).write_text("stored manifest")
+    monkeypatch.setattr(gen_locks, "commit_date", lambda _commit: "2026-01-01")
+    monkeypatch.setattr(gen_locks, "full_deps", lambda _commit: {"numpy"})
+
+    expected = "stored manifest" if stored else gen_locks.manifest("2026-01-01", "3.13", {"numpy"})
+    assert run_history.locked_manifest("a" * 40, lock, "3.13") == expected

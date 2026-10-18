@@ -65,13 +65,19 @@ def env_dir(commit):
     return ENVS_CACHE / commit[:10]
 
 
+def locked_manifest(commit, lock, python):
+    """Return the manifest ``lock`` was solved from, rebuilding it for locks that predate stored manifests."""
+    stored = gen_locks.manifest_path(lock)
+    if stored.exists():
+        return stored.read_text()
+    return gen_locks.manifest(gen_locks.commit_date(commit), python, gen_locks.full_deps(commit))
+
+
 def build_env(commit, lock, python):
-    """Reconstruct the date-locked env from its lock; return the env's python path."""
-    date = gen_locks.commit_date(commit)
+    """Reconstruct the date-locked env from its lock and return the env's python path."""
     work = env_dir(commit)
     work.mkdir(parents=True, exist_ok=True)
-    # Rebuild the exact manifest gen_locks used, so `pixi install --locked` matches the stored lock.
-    (work / "pixi.toml").write_text(gen_locks.manifest(date, python, gen_locks.full_deps(commit)))
+    (work / "pixi.toml").write_text(locked_manifest(commit, lock, python))
     (work / "pixi.lock").write_bytes(lock.read_bytes())
     run(["pixi", "install", "--locked", "--manifest-path", str(work / "pixi.toml")])
     py = work / ".pixi" / "envs" / "default" / "bin" / "python"
