@@ -60,6 +60,14 @@ def test_new_stack_version_misses(gcn_file, monkeypatch, component, new_version)
     assert _cache.load_or_build("warm", gcn_file, lambda: "new stack") == "new stack"
 
 
+@pytest.mark.usefixtures("cache_dir")
+def test_schema_bump_misses(gcn_file, monkeypatch):
+    _cache.load_or_build("warm", gcn_file, lambda: "old schema")
+    monkeypatch.setattr(_cache, "CACHE_SCHEMA", _cache.CACHE_SCHEMA + 1)
+
+    assert _cache.load_or_build("warm", gcn_file, lambda: "new schema") == "new schema"
+
+
 def test_failed_dump_publishes_no_entry(cache_dir, gcn_file):
     with pytest.raises(TypeError, match="cannot pickle"):
         _cache.load_or_build("warm", gcn_file, Unpicklable)

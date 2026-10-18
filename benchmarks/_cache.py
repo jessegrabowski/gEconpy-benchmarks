@@ -1,8 +1,8 @@
 """Disk-backed reuse of compiled models, so eval/solve benchmarks don't recompile every run.
 
 asv runs each benchmark in its own subprocess, so an in-memory cache can't span benchmarks and the cache lives on disk.
-Entries are content-addressed by the GCN bytes, the gEconpy, pytensor and Python versions, and a caller-supplied
-tag, so a reloaded model always matches the code under test: a new commit (new version) misses and
+Entries are content-addressed by the GCN bytes, the gEconpy, pytensor and Python versions, ``CACHE_SCHEMA``, and a
+caller-supplied tag, so a reloaded model always matches the code under test: a new commit (new version) misses and
 rebuilds. cloudpickle handles the compiled PyTensor functions (a compiled RBC model is ~0.1MB and reloads ~50x faster
 than rebuilding).
 
@@ -19,6 +19,9 @@ from pathlib import Path
 import cloudpickle
 
 CACHE_DIR = Path(__file__).resolve().parent.parent / ".model_cache"
+
+# Bump when warm_model's builder changes what a cached model contains.
+CACHE_SCHEMA = 1
 
 _MEMO = {}
 
@@ -40,7 +43,7 @@ def _stack_versions():
 
 def _key(tag, gcn_path, stack):
     digest = hashlib.sha1(Path(gcn_path).read_bytes()).hexdigest()[:12]
-    versions = f"{stack['gEconpy']}__pt{stack['pytensor']}__py{stack['python']}"
+    versions = f"{stack['gEconpy']}__pt{stack['pytensor']}__py{stack['python']}__s{CACHE_SCHEMA}"
     return f"{tag.replace('/', '_')}__{versions}__{digest}"
 
 
