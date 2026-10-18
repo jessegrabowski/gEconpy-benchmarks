@@ -79,4 +79,5 @@ known-third-party = ["gEconpy"]
 [tool.pytest.ini_options]
 minversion = "9.0"
 testpaths = ["tests"]
+pythonpath = [".", "scripts"]
 xfail_strict = true
