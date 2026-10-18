@@ -159,7 +159,15 @@ def process(commit, lock, python, machine, asv_args, rerun=False):
 
 
 def resolve(args, locks):
-    """Return the (commit, lock_path, python) targets in history order, and the requested commits that have no lock."""
+    """Split the requested commits into benchmark targets and commits that have no lock.
+
+    Returns
+    -------
+    targets : list of tuple
+        ``(commit, lock_path, python)`` for each commit to benchmark, in history order.
+    unlocked : list of str
+        Full hashes of commits named by ``--commits`` that have no lock.
+    """
     gen_locks.ensure_clone()
     unlocked = []
     if args.commits:
