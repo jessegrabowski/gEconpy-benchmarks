@@ -41,7 +41,7 @@ jobs:
       - name: Collapse per-commit date-locked envs into one series
         # Each historical commit was benchmarked in its own date-locked env; without this asv would
         # plot one isolated point per env instead of a continuous line per benchmark across history.
-        run: python scripts/normalize_results.py
+        run: python scripts/normalize_results.py --in-place
 
       - name: Build HTML from committed results
         # asv publish clones the project (per asv.conf.json `repo`) to map commit hashes to dates
