@@ -1,4 +1,5 @@
 import argparse
+import subprocess
 
 import gen_locks
 import pytest
@@ -27,6 +28,19 @@ def test_main_fails_a_requested_commit_without_a_lock(clone, monkeypatch, capsys
 
     assert run_history.main(["--commits", clone[:7]]) == 1
     assert f"FAIL   {clone[:10]} (no lock; run gen_locks.py --commits {clone[:10]} first)" in capsys.readouterr().out
+
+
+def test_main_still_benchmarks_locked_commits_alongside_an_unlocked_one(clone, monkeypatch):
+    git = ["git", "-C", str(gen_locks.GECONPY_CLONE), "-c", "user.name=test", "-c", "user.email=test@example.com"]
+    subprocess.run([*git, "commit", "--quiet", "--allow-empty", "-m", "second commit"], check=True)
+    unlocked = subprocess.run([*git, "rev-parse", "HEAD"], check=True, capture_output=True, text=True).stdout.strip()
+    benchmarked = []
+    monkeypatch.setattr(run_history, "machine_name", lambda: "test-machine")
+    monkeypatch.setattr(run_history, "locked_commits", lambda: {clone[:10]: (None, "3.13")})
+    monkeypatch.setattr(run_history, "process", lambda commit, *_args, **_kwargs: benchmarked.append(commit) or True)
+
+    assert run_history.main(["--commits", clone[:7], unlocked[:7]]) == 1
+    assert benchmarked == [clone]
 
 
 @pytest.mark.parametrize(("failing", "exit_code"), [(set(), 0), ({"b" * 40}, 1)], ids=["all-succeed", "one-fails"])
