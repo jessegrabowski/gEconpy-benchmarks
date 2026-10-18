@@ -8,10 +8,9 @@ function at a steady state computed once in `setup`. The compile/symbolic benchm
 uncached models on purpose.
 """
 
-from .._support import build_model, warm_model
+from .._support import LADDER, build_model, warm_model
 
-LADDER = ["small", "rbc", "medium", "large"]
-COMPILE_LADDER = ["small", "rbc", "medium"]  # large compile is too slow to time repeatedly
+COMPILE_LADDER = [name for name in LADDER if name != "large"]  # large compile is too slow to time repeatedly
 
 
 class LinearizeEval:

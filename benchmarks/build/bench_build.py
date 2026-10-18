@@ -6,9 +6,7 @@ estimation/. Because no compilation happens here, building a fresh model each ca
 cold measurement with no shared state.
 """
 
-from .._support import gcn_path, peak_traced_bytes
-
-LADDER = ["small", "rbc", "medium", "large"]
+from .._support import LADDER, gcn_path, peak_traced_bytes
 
 
 class Build:
