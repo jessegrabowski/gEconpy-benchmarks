@@ -176,7 +176,7 @@ def resolve(args, locks):
         unlocked = [full for full in requested if full[:10] not in locks]
     else:
         order = gen_locks.run(
-            ["git", "-C", str(gen_locks.GECONPY_CLONE), "rev-list", "--reverse", args.range or "main"]
+            ["git", "-C", str(gen_locks.GECONPY_CLONE), "rev-list", "--reverse", args.range or gen_locks.DEFAULT_RANGE]
         ).split()
         wanted = [(full, *locks[full[:10]]) for full in order if full[:10] in locks]
     if args.steps and args.steps < len(wanted):
@@ -187,7 +187,7 @@ def resolve(args, locks):
 
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--range", help="git rev-list range (default: main)")
+    p.add_argument("--range", help=f"git rev-list range (default: {gen_locks.DEFAULT_RANGE})")
     p.add_argument("--steps", type=int, help="evenly-spaced subset")
     p.add_argument("--commits", nargs="+", help="explicit commit hashes")
     p.add_argument(
