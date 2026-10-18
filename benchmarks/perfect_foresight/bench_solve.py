@@ -23,9 +23,8 @@ class PerfectForesight:
         self.model = warm_model(model)
         ss = self.model.steady_state(verbose=False)
 
-        # Perturb the first state variable away from its steady state to drive the transition.
-        first_var = self.model.variables[0].base_name
-        self.initial_conditions = {first_var: ss[f"{first_var}_ss"] * 0.9}
+        # Capital is a predetermined state in every model on this ladder.
+        self.initial_conditions = {"K": ss["K_ss"] * 0.9}
 
     def time_solve(self, model, horizon):
         self._solve(
