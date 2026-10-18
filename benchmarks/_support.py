@@ -15,13 +15,15 @@ from pathlib import Path
 # different version of it), so that benchmark timings reflect code changes alone.
 FIXTURES = Path(__file__).resolve().parent / "_fixtures"
 
-# name -> vendored GCN stem (relative to _fixtures/)
+# name -> vendored GCN stem (relative to _fixtures/), smallest first. Sizes count variables after reduction, as
+# measured on gEconpy main, and each model has as many equations as variables.
 MODEL_LADDER = {
-    "small": "Three_Equation_NK",  # ~15 equations
-    "rbc": "RBC",  # ~26 equations
-    "medium": "New_Keynesian",  # ~66 equations
-    "large": "sims_2024/nk_complete_taxes",  # ~33 equations after reduction; the largest build
+    "small": "Three_Equation_NK",  # 4 variables
+    "rbc": "RBC",  # 9 variables
+    "medium": "New_Keynesian",  # 23 variables
+    "large": "sims_2024/nk_complete_taxes",  # 33 variables
 }
+LADDER = list(MODEL_LADDER)
 
 
 def peak_traced_bytes(call):
