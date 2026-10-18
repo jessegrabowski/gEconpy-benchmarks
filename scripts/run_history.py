@@ -154,15 +154,11 @@ def process(commit, lock, python, machine, asv_args, rerun=False):
 
 def resolve(args, locks):
     """Return a list of (commit, lock_path, python) to benchmark, in history order."""
+    gen_locks.ensure_clone()
     if args.commits:
-        wanted = []
-        for requested in args.commits:
-            candidates = (short for short in locks if short.startswith(requested) or requested.startswith(short))
-            match = next(candidates, None)
-            if match:
-                wanted.append((requested, *locks[match]))
+        requested = [gen_locks.full_hash(commit) for commit in args.commits]
+        wanted = [(full, *locks[full[:10]]) for full in requested if full[:10] in locks]
     else:
-        gen_locks.ensure_clone()
         order = gen_locks.run(
             ["git", "-C", str(gen_locks.GECONPY_CLONE), "rev-list", "--reverse", args.range or "main"]
         ).split()

@@ -141,9 +141,18 @@ def ensure_clone():
     run(["git", "-C", str(GECONPY_CLONE), "fetch", "--all", "--tags", "--prune"])
 
 
+def full_hash(commit):
+    """Resolve a commit name to its full hash in the gEconpy clone, raising ValueError if git can't."""
+    command = ["git", "-C", str(GECONPY_CLONE), "rev-parse", "--verify", "--quiet", f"{commit}^{{commit}}"]
+    try:
+        return run(command).strip()
+    except subprocess.CalledProcessError:
+        raise ValueError(f"{commit!r} is not a commit in {GECONPY_CLONE}") from None
+
+
 def resolve_commits(args):
     if args.commits:
-        return [commit.strip() for commit in args.commits]
+        return [full_hash(commit.strip()) for commit in args.commits]
     commits = run(["git", "-C", str(GECONPY_CLONE), "rev-list", "--reverse", args.range or "main"]).split()
     if args.steps and args.steps < len(commits):
         step = len(commits) / args.steps

@@ -1,3 +1,5 @@
+import argparse
+
 import gen_locks
 import pytest
 
@@ -92,3 +94,9 @@ def test_main_exit_code_reports_failures(tmp_path, monkeypatch, failing, exit_co
     monkeypatch.setattr(gen_locks, "generate", lambda commit: commit not in failing)
 
     assert gen_locks.main([]) == exit_code
+
+
+def test_resolve_commits_expands_short_hashes(clone):
+    args = argparse.Namespace(commits=[clone[:7]], range=None, steps=None)
+
+    assert gen_locks.resolve_commits(args) == [clone]
