@@ -44,14 +44,3 @@ class Gensys(_SolverBenchmark):
 
     def time_solve(self, model):
         self._solve(self.A, self.B, self.C, self.D, tol=1e-8)
-
-
-class BackwardDirect(_SolverBenchmark):
-    def setup(self, model):
-        super().setup(model)
-        from gEconpy.solvers.backward_looking import solve_policy_function_with_backward_direct
-
-        self._solve = solve_policy_function_with_backward_direct
-
-    def time_solve(self, model):
-        self._solve(self.A, self.B, self.C, self.D)

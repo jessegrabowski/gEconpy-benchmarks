@@ -33,10 +33,3 @@ class PerfectForesight:
             simulation_length=horizon,
             initial_conditions=self.initial_conditions,
         )
-
-    def peakmem_solve(self, model, horizon):
-        self._solve(
-            self.model,
-            simulation_length=horizon,
-            initial_conditions=self.initial_conditions,
-        )

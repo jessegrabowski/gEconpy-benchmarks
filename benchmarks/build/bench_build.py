@@ -24,6 +24,3 @@ class Build:
 
     def time_build(self, model):
         self._build(self.path, verbose=False)
-
-    def peakmem_build(self, model):
-        self._build(self.path, verbose=False)

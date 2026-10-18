@@ -23,9 +23,6 @@ class Analytic:
     def time_analytic(self, model):
         self.model.steady_state(how="analytic", verbose=False)
 
-    def peakmem_analytic(self, model):
-        self.model.steady_state(how="analytic", verbose=False)
-
 
 class Numeric:
     params = [["small", "rbc"]]

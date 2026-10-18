@@ -28,9 +28,6 @@ class ObservationEquations:
     def time_logp_dlogp(self):
         self._f(self._q)
 
-    def peakmem_logp_dlogp(self):
-        self._f(self._q)
-
 
 class FrequencyChange:
     timeout = TIMEOUT
@@ -41,9 +38,6 @@ class FrequencyChange:
     def time_logp_dlogp(self):
         self._f(self._q)
 
-    def peakmem_logp_dlogp(self):
-        self._f(self._q)
-
 
 class MixedLogLin:
     timeout = TIMEOUT
@@ -52,7 +46,4 @@ class MixedLogLin:
         self._f, self._q = warmed_logp_dlogp(mixed_loglin_model())
 
     def time_logp_dlogp(self):
-        self._f(self._q)
-
-    def peakmem_logp_dlogp(self):
         self._f(self._q)
