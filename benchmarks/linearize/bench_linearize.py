@@ -1,15 +1,16 @@
-"""Linearization, split into graph construction versus evaluation.
+"""Linearization, split into graph construction, full compilation, and evaluation.
 
-`linearize_model` decomposes into `symbolic_linearization` — building the A/B/C/D PyTensor graphs via
-autodiff — and evaluating the compiled callable at a steady state and parameter vector. The compiled
-function is memoized on the Model, so warm `time_eval` measures pure evaluation, while `time_symbolic`
-clears the graph cache each call to measure graph construction (the dominant, most actionable cost
-for this codebase).
+`linearize_model` decomposes into `symbolic_linearization` (building the A/B/C/D PyTensor graphs via
+autodiff), then compiling them to a callable, then evaluating that callable. `time_symbolic` times
+graph construction; `time_compile` times the full graph-build + rewrite + link (the compilation that
+the reuse cache lets every other benchmark skip); `time_eval` times pure evaluation of the cached
+function. The compile/symbolic benchmarks build fresh, uncached models on purpose.
 """
 
 from .._support import build_model, warm_model
 
 LADDER = ["small", "rbc", "medium", "large"]
+COMPILE_LADDER = ["small", "rbc", "medium"]  # large compile is too slow to time repeatedly
 
 
 class LinearizeEval:
@@ -40,3 +41,20 @@ class LinearizeSymbolic:
         """Build the A/B/C/D PyTensor graphs via autodiff (cache cleared each call)."""
         self.model._symbolic_linearize_cache.clear()
         self.model.symbolic_linearization(verbose=False)
+
+
+class LinearizeCompile:
+    params = [COMPILE_LADDER]
+    param_names = ["model"]
+    timeout = 600
+
+    def setup(self, model):
+        self.model = build_model(model)  # uncached: this benchmark measures compilation
+        self.model.steady_state(verbose=False)
+        self.model.linearize_model(verbose=False)  # create the caches (untimed)
+
+    def time_compile(self, model):
+        """Rebuild the A/B/C/D graphs and recompile the function (rewrites + link)."""
+        self.model._symbolic_linearize_cache.clear()
+        self.model._linearize_cache.clear()
+        self.model.linearize_model(verbose=False)
