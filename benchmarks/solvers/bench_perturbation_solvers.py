@@ -14,6 +14,7 @@ LADDER = ["small", "rbc", "medium", "large"]
 class _SolverBenchmark:
     params = [LADDER]
     param_names = ["model"]
+    timeout = 900
 
     def setup(self, model):
         A, B, C, D = solved_matrices(model)

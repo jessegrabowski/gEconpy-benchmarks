@@ -12,6 +12,7 @@ LADDER = ["rbc", "medium"]
 class Statistics:
     params = [LADDER]
     param_names = ["model"]
+    timeout = 900
 
     def setup(self, model):
         from gEconpy import (

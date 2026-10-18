@@ -14,6 +14,7 @@ LADDER = ["small", "rbc", "medium", "large"]
 class Build:
     params = [LADDER]
     param_names = ["model"]
+    timeout = 900  # the large model builds slowly on old (pre-overhaul) gEconpy
 
     def setup(self, model):
         from gEconpy.model.build import model_from_gcn

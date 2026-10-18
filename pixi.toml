@@ -36,6 +36,7 @@ pyparsing = "*"
 xarray = "*"
 networkx = "*"
 ipython = "*"
+cloudpickle = "*"
 
 # Benchmark runner.
 asv = ">=0.6.4"

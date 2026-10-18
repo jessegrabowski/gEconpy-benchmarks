@@ -7,7 +7,7 @@ clears the graph cache each call to measure graph construction (the dominant, mo
 for this codebase).
 """
 
-from .._support import build_model
+from .._support import build_model, warm_model
 
 LADDER = ["small", "rbc", "medium", "large"]
 
@@ -15,11 +15,11 @@ LADDER = ["small", "rbc", "medium", "large"]
 class LinearizeEval:
     params = [LADDER]
     param_names = ["model"]
+    timeout = 900  # setup builds the model on a cache miss (slow for large on old gEconpy)
 
     def setup(self, model):
-        self.model = build_model(model)
-        self.model.steady_state(verbose=False)
-        self.model.linearize_model(verbose=False)  # warm the A/B/C/D compile
+        self.model = warm_model(model)
+        self.model.linearize_model(verbose=False)  # relink the compiled A/B/C/D from cache
 
     def time_eval(self, model):
         """Evaluate the (cached) compiled A/B/C/D function at the steady state."""
@@ -29,6 +29,7 @@ class LinearizeEval:
 class LinearizeSymbolic:
     params = [LADDER]
     param_names = ["model"]
+    timeout = 900
 
     def setup(self, model):
         self.model = build_model(model)

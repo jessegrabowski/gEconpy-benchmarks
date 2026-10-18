@@ -6,7 +6,7 @@ The numeric path additionally runs a SciPy root solve over a compiled residual/J
 compile is warmed in `setup`, so `time_root` isolates the solve loop.
 """
 
-from .._support import build_model
+from .._support import warm_model
 
 LADDER = ["small", "rbc", "medium", "large"]
 
@@ -14,10 +14,11 @@ LADDER = ["small", "rbc", "medium", "large"]
 class Analytic:
     params = [LADDER]
     param_names = ["model"]
+    timeout = 900
 
     def setup(self, model):
-        self.model = build_model(model)
-        self.model.steady_state(how="analytic", verbose=False)  # warm the f_ss compile
+        self.model = warm_model(model)
+        self.model.steady_state(how="analytic", verbose=False)  # relink the f_ss function
 
     def time_analytic(self, model):
         self.model.steady_state(how="analytic", verbose=False)
@@ -31,7 +32,7 @@ class Numeric:
     param_names = ["model"]
 
     def setup(self, model):
-        self.model = build_model(model)
+        self.model = warm_model(model)
         # Warm the residual/Jacobian compile so the timed call measures only the solve.
         self.model.steady_state(how="root", progressbar=False, verbose=False)
 

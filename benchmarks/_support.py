@@ -28,10 +28,36 @@ def gcn_path(name):
 
 
 def build_model(name, mode=None):
-    """Build a fully compiled `Model` from a ladder key."""
+    """Build a freshly compiled `Model` from a ladder key, uncached.
+
+    Used by the build and compile-measurement benchmarks, which must pay the full construction and
+    compilation cost on every call. Eval/solve benchmarks should use `warm_model` instead.
+    """
     from gEconpy.model.build import model_from_gcn
 
-    return model_from_gcn(gcn_path(name), verbose=False, mode=mode)
+    # Only pass ``mode`` when set, so the default path works on older gEconpy that predates the
+    # ``backend`` -> ``mode`` rename.
+    kwargs = {} if mode is None else {"mode": mode}
+    return model_from_gcn(gcn_path(name), verbose=False, **kwargs)
+
+
+def warm_model(name, mode=None):
+    """Return a fully warmed `Model` (steady state + linearization + solution compiled), cached.
+
+    The compile happens once per (model, gEconpy version) and is reused across benchmarks and runs,
+    so eval/solve benchmark `setup` reloads it instead of recompiling. The benchmark still triggers
+    one warm call of its target method to relink the compiled function from PyTensor's cache.
+    """
+    from ._cache import load_or_build
+
+    def _build():
+        model = build_model(name, mode=mode)
+        model.steady_state(verbose=False)
+        model.linearize_model(verbose=False)
+        model.solve_model(verbose=False)
+        return model
+
+    return load_or_build(f"warm_{mode}", gcn_path(name), _build)
 
 
 def solved_matrices(name, mode=None):
@@ -40,15 +66,12 @@ def solved_matrices(name, mode=None):
     These feed the perturbation-solver benchmarks, which are pure NumPy linear algebra and so
     must be fed already-evaluated matrices rather than a live model.
     """
-    model = build_model(name, mode=mode)
-    model.steady_state(verbose=False)
-    A, B, C, D = model.linearize_model(verbose=False)
+    A, B, C, D = warm_model(name, mode=mode).linearize_model(verbose=False)
     return A, B, C, D
 
 
 def policy_matrices(name, mode=None):
     """Return the perturbation solution (T, R) for post-solution analysis benchmarks."""
-    model = build_model(name, mode=mode)
-    model.steady_state(verbose=False)
+    model = warm_model(name, mode=mode)
     T, R = model.solve_model(verbose=False)
     return model, T, R
