@@ -17,6 +17,7 @@ pip = "*"
 hatchling = "*"
 hatch-vcs = "*"
 setuptools = "*"
+versioneer = "*"
 
 # gEconpy runtime tree (all conda-forge installable).
 numpy = "*"

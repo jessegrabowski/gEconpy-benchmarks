@@ -16,6 +16,7 @@ Usage::
 
 import argparse
 import platform
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -52,21 +53,25 @@ def already_done(commit, machine):
 
 
 def locked_commits():
-    """Map commit-prefix -> lock path, from filenames ``<date>_<shorthash>.lock``."""
+    """Map commit-prefix -> (lock path, python), from ``<date>_<shorthash>_py<ver>.lock``."""
     out = {}
-    for lock in gen_locks.LOCKS_DIR.glob("*.lock"):
-        short = lock.stem.split("_", 1)[1]
-        out[short] = lock
+    for lock in gen_locks.LOCKS_DIR.glob("*_py*.lock"):
+        _date, short, py = lock.stem.split("_")
+        out[short] = (lock, py.removeprefix("py"))
     return out
 
 
-def build_env(commit, lock):
+def env_dir(commit):
+    return ENVS_CACHE / commit[:10]
+
+
+def build_env(commit, lock, python):
     """Reconstruct the date-locked env from its lock; return the env's python path."""
     date = gen_locks.commit_date(commit)
-    python = gen_locks.pick_python(commit)
-    work = ENVS_CACHE / commit[:10]
+    work = env_dir(commit)
     work.mkdir(parents=True, exist_ok=True)
-    (work / "pixi.toml").write_text(gen_locks.manifest(date, python))
+    # Rebuild the exact manifest gen_locks used, so `pixi install --locked` matches the stored lock.
+    (work / "pixi.toml").write_text(gen_locks.manifest(date, python, gen_locks.full_deps(commit)))
     (work / "pixi.lock").write_bytes(lock.read_bytes())
     run(["pixi", "install", "--locked", "--manifest-path", str(work / "pixi.toml")])
     py = work / ".pixi" / "envs" / "default" / "bin" / "python"
@@ -77,6 +82,10 @@ def build_env(commit, lock):
 
 def install_geconpy(commit, python):
     run(["git", "-C", str(gen_locks.GECONPY_CLONE), "checkout", "--quiet", "--force", commit])
+    # Force a current asv into the target env: it's the benchmark harness (not the thing measured),
+    # and the date-locked asv in pre-2024 envs predates the asv/asv_runner split, which the current
+    # orchestrator requires. Installed on top of the locked env so no re-lock is needed.
+    run([str(python), "-m", "pip", "install", "-U", "asv>=0.6.4", "--quiet"])
     run([str(python), "-m", "pip", "install", str(gen_locks.GECONPY_CLONE),
          "--no-build-isolation", "--quiet", "--no-deps"])
 
@@ -86,30 +95,56 @@ def benchmark(commit, python, machine, asv_args):
          "--machine", machine, "--show-stderr", *asv_args], cwd=str(REPO_ROOT))
 
 
-def process(commit, lock, machine, asv_args):
-    if already_done(commit, machine):
+def installable(commit):
+    """True if the commit has a pip-installable packaging file (setup.py / pyproject) at its root.
+
+    Pre-packaging commits (early-2021..~2022 prototype era) ran from source and can't be installed;
+    checking the git tree first skips them instantly instead of building an env that then fails.
+    """
+    try:
+        tree = gen_locks.run(["git", "-C", str(gen_locks.GECONPY_CLONE), "ls-tree", "--name-only", commit])
+    except subprocess.CalledProcessError:
+        return False
+    return bool(set(tree.split()) & {"setup.py", "pyproject.toml"})
+
+
+def process(commit, lock, python, machine, asv_args, rerun=False):
+    if not rerun and already_done(commit, machine):
         print(f"  skip   {commit[:10]} (results exist)")
         return True
+    if not installable(commit):
+        print(f"  skip   {commit[:10]} (pre-packaging: no setup.py/pyproject)")
+        return True
     try:
-        python = build_env(commit, lock)
-        install_geconpy(commit, python)
-        benchmark(commit, python, machine, asv_args)
+        env_python = build_env(commit, lock, python)
+        install_geconpy(commit, env_python)
+        benchmark(commit, env_python, machine, asv_args)
     except (subprocess.CalledProcessError, FileNotFoundError) as exc:
         print(f"  FAIL   {commit[:10]}: {exc}")
         return False
+    finally:
+        # Reclaim the per-commit env; it's reconstructable from the lock. Keeps a 200+ commit sweep
+        # from accumulating one full conda env per commit on disk.
+        shutil.rmtree(env_dir(commit), ignore_errors=True)
     print(f"  done   {commit[:10]}")
     return True
 
 
 def resolve(args, locks):
+    """Return a list of (commit, lock_path, python) to benchmark, in history order."""
     if args.commits:
-        wanted = [(c, locks[c[:10]]) for c in args.commits if c[:10] in locks]
+        wanted = []
+        for requested in args.commits:
+            candidates = (short for short in locks if short.startswith(requested) or requested.startswith(short))
+            match = next(candidates, None)
+            if match:
+                wanted.append((requested, *locks[match]))
     else:
         gen_locks.ensure_clone()
         order = gen_locks.run(
             ["git", "-C", str(gen_locks.GECONPY_CLONE), "rev-list", "--reverse", args.range or "main"]
         ).split()
-        wanted = [(full, locks[full[:10]]) for full in order if full[:10] in locks]
+        wanted = [(full, *locks[full[:10]]) for full in order if full[:10] in locks]
     if args.steps and args.steps < len(wanted):
         step = len(wanted) / args.steps
         wanted = [wanted[int(i * step)] for i in range(args.steps)]
@@ -121,6 +156,9 @@ def main(argv=None):
     p.add_argument("--range", help="git rev-list range (default: main)")
     p.add_argument("--steps", type=int, help="evenly-spaced subset")
     p.add_argument("--commits", nargs="+", help="explicit commit hashes")
+    p.add_argument("--rerun",
+                   action="store_true",
+                   help="benchmark even commits that already have results (e.g. to add benchmarks)")
     p.add_argument("asv_args", nargs="*", help="extra args passed through to `asv run`")
     args = p.parse_args(argv)
 
@@ -131,7 +169,10 @@ def main(argv=None):
         return 1
     targets = resolve(args, locks)
     print(f"Benchmarking {len(targets)} commit(s) on machine {machine!r}")
-    failures = sum(not process(c, lp, machine, args.asv_args) for c, lp in targets)
+    failures = sum(
+        not process(commit, lock, python, machine, args.asv_args, rerun=args.rerun)
+        for commit, lock, python in targets
+    )
     if failures:
         print(f"\n{failures} commit(s) failed (logged above).", file=sys.stderr)
     return 0
