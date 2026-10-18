@@ -4,7 +4,8 @@
 autodiff), then compiling them to a callable, then evaluating that callable. `time_symbolic` times
 graph construction; `time_compile` times the full graph-build + rewrite + link (the compilation that
 the reuse cache lets every other benchmark skip); `time_eval` times pure evaluation of the cached
-function. The compile/symbolic benchmarks build fresh, uncached models on purpose.
+function at a steady state computed once in `setup`. The compile/symbolic benchmarks build fresh,
+uncached models on purpose.
 """
 
 from .._support import build_model, warm_model
@@ -20,11 +21,13 @@ class LinearizeEval:
 
     def setup(self, model):
         self.model = warm_model(model)
-        self.model.linearize_model(verbose=False)  # relink the compiled A/B/C/D from cache
+        self.steady_state = self.model.steady_state(verbose=False)
+        # Relink the compiled A/B/C/D from cache.
+        self.model.linearize_model(steady_state=self.steady_state, verbose=False)
 
     def time_eval(self, model):
-        """Evaluate the (cached) compiled A/B/C/D function at the steady state."""
-        self.model.linearize_model(verbose=False)
+        """Evaluate the (cached) compiled A/B/C/D function at a precomputed steady state."""
+        self.model.linearize_model(steady_state=self.steady_state, verbose=False)
 
 
 class LinearizeSymbolic:
