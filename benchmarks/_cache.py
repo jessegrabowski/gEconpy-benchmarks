@@ -11,6 +11,7 @@ compilation.
 """
 
 import hashlib
+import json
 import re
 import sys
 
@@ -36,6 +37,15 @@ def _gEconpy_version():
     return getattr(gEconpy, "__version__", "unknown")
 
 
+def _gEconpy_is_editable():
+    """Return True for an editable install, whose recorded version is frozen at install time while the code moves."""
+    try:
+        direct_url = metadata.distribution("gEconpy").read_text("direct_url.json") or "{}"
+    except metadata.PackageNotFoundError:
+        return False
+    return json.loads(direct_url).get("dir_info", {}).get("editable", False)
+
+
 def _stack_versions():
     try:
         pytensor = metadata.version("pytensor")
@@ -59,14 +69,15 @@ def load_or_build(tag, gcn_path, builder):
     """Return a cached compiled object for ``tag``+``gcn_path``, building and caching it on a miss.
 
     ``builder`` is a zero-argument callable invoked only on a cache miss. When the installed gEconpy version doesn't
-    identify its code (a dirty tree, or no version at all), the result is kept for this process only.
+    identify its code (a dirty tree, an editable install, or no version at all), the result is kept for this process
+    only.
     """
     stack = _stack_versions()
     key = _key(tag, gcn_path, stack)
     if key in _MEMO:
         return _MEMO[key]
 
-    if not _identifies_code(stack["gEconpy"]):
+    if not _identifies_code(stack["gEconpy"]) or _gEconpy_is_editable():
         _MEMO[key] = builder()
         return _MEMO[key]
 

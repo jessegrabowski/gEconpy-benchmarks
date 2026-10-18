@@ -1,3 +1,5 @@
+from importlib import metadata
+
 import pytest
 
 from benchmarks import _cache
@@ -16,6 +18,7 @@ def cache_dir(tmp_path, monkeypatch):
     monkeypatch.setattr(_cache, "CACHE_DIR", directory)
     monkeypatch.setattr(_cache, "_MEMO", {})
     monkeypatch.setattr(_cache, "_stack_versions", lambda: dict(STACK))
+    monkeypatch.setattr(_cache, "_gEconpy_is_editable", lambda: False)
     return directory
 
 
@@ -89,3 +92,43 @@ def test_failed_dump_publishes_no_entry(cache_dir, gcn_file):
         _cache.load_or_build("warm", gcn_file, Unpicklable)
 
     assert not list(cache_dir.glob("*.pkl"))
+
+
+def test_editable_install_stays_off_disk(cache_dir, gcn_file, monkeypatch):
+    monkeypatch.setattr(_cache, "_gEconpy_is_editable", lambda: True)
+
+    assert _cache.load_or_build("warm", gcn_file, lambda: "built") == "built"
+    assert not cache_dir.exists() or not list(cache_dir.iterdir())
+
+
+class FakeDistribution:
+    def __init__(self, direct_url):
+        self.direct_url = direct_url
+
+    def read_text(self, filename):
+        return self.direct_url if filename == "direct_url.json" else None
+
+
+@pytest.mark.parametrize(
+    ("direct_url", "expected"),
+    [
+        ('{"dir_info": {"editable": true}, "url": "file:///src/gEconpy"}', True),
+        ('{"dir_info": {"editable": false}, "url": "file:///src/gEconpy"}', False),
+        ('{"dir_info": {}, "url": "file:///src/gEconpy"}', False),
+        (None, False),
+    ],
+    ids=["editable", "editable-false", "local-non-editable", "wheel"],
+)
+def test_gEconpy_is_editable_reads_direct_url(monkeypatch, direct_url, expected):
+    monkeypatch.setattr(metadata, "distribution", lambda _name: FakeDistribution(direct_url))
+
+    assert _cache._gEconpy_is_editable() is expected
+
+
+def test_gEconpy_is_editable_without_gEconpy_installed(monkeypatch):
+    def missing(name):
+        raise metadata.PackageNotFoundError(name)
+
+    monkeypatch.setattr(metadata, "distribution", missing)
+
+    assert _cache._gEconpy_is_editable() is False
