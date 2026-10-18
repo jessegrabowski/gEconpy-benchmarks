@@ -11,6 +11,7 @@ compilation.
 """
 
 import hashlib
+import re
 import sys
 
 from importlib import metadata
@@ -22,6 +23,9 @@ CACHE_DIR = Path(__file__).resolve().parent.parent / ".model_cache"
 
 # Bump when warm_model's builder changes what a cached model contains.
 CACHE_SCHEMA = 1
+
+# hatch-vcs marks a dirty tree with a date-only suffix and versioneer with ".dirty". Neither identifies the code.
+DIRTY_VERSION = re.compile(r"(\.d\d{8}|\.dirty)$")
 
 _MEMO = {}
 
@@ -47,14 +51,23 @@ def _key(tag, gcn_path, stack):
     return f"{tag.replace('/', '_')}__{versions}__{digest}"
 
 
+def _identifies_code(gEconpy_version):
+    return gEconpy_version != "unknown" and DIRTY_VERSION.search(gEconpy_version) is None
+
+
 def load_or_build(tag, gcn_path, builder):
     """Return a cached compiled object for ``tag``+``gcn_path``, building and caching it on a miss.
 
-    ``builder`` is a zero-argument callable invoked only on a cache miss.
+    ``builder`` is a zero-argument callable invoked only on a cache miss. When the installed gEconpy version doesn't
+    identify its code (a dirty tree, or no version at all), the result is kept for this process only.
     """
     stack = _stack_versions()
     key = _key(tag, gcn_path, stack)
     if key in _MEMO:
+        return _MEMO[key]
+
+    if not _identifies_code(stack["gEconpy"]):
+        _MEMO[key] = builder()
         return _MEMO[key]
 
     path = CACHE_DIR / f"{key}.pkl"

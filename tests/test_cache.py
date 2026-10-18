@@ -68,6 +68,22 @@ def test_schema_bump_misses(gcn_file, monkeypatch):
     assert _cache.load_or_build("warm", gcn_file, lambda: "new schema") == "new schema"
 
 
+@pytest.mark.parametrize("version", ["2.2.1.dev3+g9407fda8e.d20260911", "1.3.0+4.g1a2b3c4.dirty", "unknown"])
+def test_unidentifiable_version_stays_off_disk(cache_dir, gcn_file, monkeypatch, version):
+    monkeypatch.setattr(_cache, "_stack_versions", lambda: {**STACK, "gEconpy": version})
+    calls = []
+
+    def builder():
+        calls.append(1)
+        return "built"
+
+    assert _cache.load_or_build("warm", gcn_file, builder) == "built"
+    assert _cache.load_or_build("warm", gcn_file, builder) == "built"
+
+    assert len(calls) == 1
+    assert not cache_dir.exists() or not list(cache_dir.iterdir())
+
+
 def test_failed_dump_publishes_no_entry(cache_dir, gcn_file):
     with pytest.raises(TypeError, match="cannot pickle"):
         _cache.load_or_build("warm", gcn_file, Unpicklable)
