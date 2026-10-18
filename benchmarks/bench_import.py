@@ -1,36 +1,25 @@
-"""Import cost of gEconpy's own modules.
+"""Import cost of gEconpy itself, timed in a fresh interpreter.
 
-`setup` evicts gEconpy from the module cache so each timed import re-executes gEconpy's package
-initialisation (its heavy third-party dependencies stay cached, so this isolates gEconpy's own
-import overhead rather than re-importing pytensor/pymc each time).
+asv runs a `timeraw_` benchmark's setup string untimed in a new process, then times the code. The setup imports every
+runtime dependency the installed gEconpy declares, so the timed ``import gEconpy`` measures gEconpy's own modules. A
+dependency whose import name differs from its distribution name is skipped, and so is one missing from the environment.
 """
-
-import sys
-
-
-def _evict_gEconpy():
-    for name in [k for k in sys.modules if k.startswith("gEconpy")]:
-        del sys.modules[name]
 
 
 class Import:
-    def setup(self):
-        _evict_gEconpy()
-
-    def teardown(self):
-        _evict_gEconpy()
-
-    def time_gEconpy(self):
-        import gEconpy  # noqa: F401
-
-    def time_parser(self):
-        _evict_gEconpy()
-        from gEconpy import parser  # noqa: F401
-
-    def time_model_build(self):
-        _evict_gEconpy()
-        from gEconpy.model import build  # noqa: F401
-
-    def time_statespace(self):
-        _evict_gEconpy()
-        from gEconpy.model import statespace  # noqa: F401
+    def timeraw_gEconpy(self):
+        # asv embeds this string in a non-raw triple-quoted string, so it must not contain backslashes.
+        preload = (
+            "import importlib\n"
+            "import importlib.util\n"
+            "import itertools\n"
+            "from importlib import metadata\n"
+            "for requirement in metadata.requires('gEconpy') or []:\n"
+            "    if 'extra ==' in requirement:\n"
+            "        continue\n"
+            "    name = ''.join(itertools.takewhile(lambda ch: ch.isalnum() or ch in '-_.', requirement))\n"
+            "    module = name.replace('-', '_').lower()\n"
+            "    if module and importlib.util.find_spec(module) is not None:\n"
+            "        importlib.import_module(module)\n"
+        )
+        return "import gEconpy", preload
